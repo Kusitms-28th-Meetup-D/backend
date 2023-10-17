@@ -16,10 +16,16 @@ public enum ErrorCode {
     /**
      *  401 Unauthorized
      */
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "접근할 수 있는 권한이 없습니다. access token을 확인하세요."),
+    INVALID_JWT_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED,  "ACCESS TOKEN의 형식이 올바르지 않습니다."),
+    EXPIRED_JWT_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "ACCESS TOKEN이 만료되었습니다. 재발급 받아주세요."),
+    INVALID_JWT_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "REFRESH TOKEN의 형식이 올바르지 않습니다."),
+    EXPIRED_JWT_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "REFRESH TOKEN이 만료되었습니다. 재발급 받아주세요."),
 
     /**
      *  403 Forbidden
      */
+    WRONG_USER_PASSWORD(HttpStatus.FORBIDDEN, "입력하신 비밀번호가 올바르지 않습니다."),
 
 
     /**

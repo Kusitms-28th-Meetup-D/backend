@@ -14,7 +14,7 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(ApplicationException.class)
     protected ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException exception) {
         log.info("{}: {}", exception.getClass().getSimpleName(), exception.getMessage(), exception);
-        return ResponseEntity.status(exception.getStatus()).body(ErrorResponse.of(exception));
+        return ResponseEntity.status(exception.getError().getStatus()).body(ErrorResponse.of(exception.getError()));
     }
 
     @ExceptionHandler(Exception.class)
