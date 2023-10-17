@@ -19,6 +19,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 // 자격증명(쿠키) 요청을 허용한다.
                 // 해당 옵션 true시 allowedOrigins를 * (전체)로 설정할 수 없다. -> 전체 origin을 뚫어줄 경우 보안이 너무나도 약해져서
-                .allowCredentials(false);
+                .allowCredentials(true);
     }
 }
