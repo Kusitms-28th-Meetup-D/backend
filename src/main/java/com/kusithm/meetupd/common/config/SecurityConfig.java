@@ -26,7 +26,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     // TODO api 추가될 때 white list url 확인해서 추가하기.
-    private static final String[] WHITE_LIST_URL  = {"/api/auth/register", "/api/auth/login", "/"};
+    private static final String[] WHITE_LIST_URL  = {"/api/auth/register","/api/auth/login", "/api/auth/reissue", "/"};
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
