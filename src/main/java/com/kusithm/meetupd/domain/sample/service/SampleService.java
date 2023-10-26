@@ -3,7 +3,7 @@ package com.kusithm.meetupd.domain.sample.service;
 import com.kusithm.meetupd.common.error.DuplicateException;
 import com.kusithm.meetupd.domain.sample.dto.response.CreateSampleResponseDto;
 import com.kusithm.meetupd.domain.sample.entity.Sample;
-import com.kusithm.meetupd.domain.sample.repository.SampleRepository;
+import com.kusithm.meetupd.domain.sample.mysql.SampleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

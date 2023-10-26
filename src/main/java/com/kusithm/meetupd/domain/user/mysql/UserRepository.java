@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.user.repository;
+package com.kusithm.meetupd.domain.user.mysql;
 
 
 import com.kusithm.meetupd.domain.user.entity.User;
