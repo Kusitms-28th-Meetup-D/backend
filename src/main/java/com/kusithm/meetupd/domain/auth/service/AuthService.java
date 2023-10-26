@@ -19,7 +19,7 @@ import com.kusithm.meetupd.domain.auth.kakao.KakaoFeignClient;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetIdResponseDto;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetUserInfoResponseDto;
 import com.kusithm.meetupd.domain.user.entity.User;
-import com.kusithm.meetupd.domain.user.repository.UserRepository;
+import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
