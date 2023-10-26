@@ -45,6 +45,9 @@ dependencies {
 
 	// open feign
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.3'
+
+	// mongoDB
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 }
 
 tasks.named('test') {
