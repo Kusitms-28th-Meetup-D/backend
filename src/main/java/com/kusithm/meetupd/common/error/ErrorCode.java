@@ -12,7 +12,6 @@ public enum ErrorCode {
      *  400 Bad Request
      */
 
-
     /**
      *  401 Unauthorized
      */
@@ -47,8 +46,8 @@ public enum ErrorCode {
     /**
      *  500 INTERNAL SERVER ERROR
      */
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다.");
-
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 이미지 업로드에 실패");
 
     private final HttpStatus status;
     private final String message;
