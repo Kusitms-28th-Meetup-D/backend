@@ -1,14 +1,17 @@
 package com.kusithm.meetupd.domain.user.entity;
 
+import com.kusithm.meetupd.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Date;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Entity(name = "WANTEAM_USER")
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +32,24 @@ public class User {
 
     @Column(name = "profile_image", nullable = true)
     private String profileImage;
+
+    @Column(name = "birth_day", nullable = false)
+    private Date birth_day;
+
+    @Column(name = "gender", nullable = false)
+    private GENDER gender;
+
+    @Column(name = "major", nullable = false)
+    private String major;
+
+    @Column(name = "task", nullable = false)
+    private String task;
+
+    @Column(name = "career", nullable = true)
+    private String career;
+
+    @Column(name = "skill", nullable = true)
+    private String skill;
 
 
     public static User createUser(Long kakaoId, String username, Integer age, String email) {
