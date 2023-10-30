@@ -39,18 +39,6 @@ public class User extends BaseEntity {
     @Column(name = "gender", nullable = false)
     private GENDER gender;
 
-    @Column(name = "major", nullable = false)
-    private String major;
-
-    @Column(name = "task", nullable = false)
-    private String task;
-
-    @Column(name = "career", nullable = true)
-    private String career;
-
-    @Column(name = "skill", nullable = true)
-    private String skill;
-
 
     public static User createUser(Long kakaoId, String username, Integer age, String email) {
         User user = User.builder()
