@@ -1,7 +1,12 @@
 package com.kusithm.meetupd.domain.contest.entity;
 
+import com.kusithm.meetupd.common.error.EnumNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
+
+import static com.kusithm.meetupd.common.error.ErrorCode.ENUM_NOT_FOUND;
 
 @AllArgsConstructor
 @Getter
@@ -18,7 +23,14 @@ public enum ContestType {
     STARTUP(9, "창업/스타트업"),
     ETC(10, "기타");
 
-    private final Integer idx;
+    private final Integer code;
 
-    private final String desc;
+    private final String value;
+
+    public static ContestType ofCode(Integer dbData) {
+        return Arrays.stream(ContestType.values())
+                .filter(v -> v.getCode().equals(dbData))
+                .findAny()
+                .orElseThrow(() -> new EnumNotFoundException(ENUM_NOT_FOUND));
+    }
 }
