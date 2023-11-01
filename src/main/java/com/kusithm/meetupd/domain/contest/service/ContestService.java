@@ -24,7 +24,8 @@ public class ContestService {
 
 
     public List<FindContestsResponseDto> findContests(LocalDate nowDate, Integer contestType) {
-        if(contestType.equals(0)) {
+        // 카테고리 전체 조회일 때
+        if(isFindAllContest(contestType)) {
             return findAllContests(nowDate);
         }
         else {
@@ -32,12 +33,12 @@ public class ContestService {
         }
     }
 
-    public List<FindContestsResponseDto> findAllContests(LocalDate nowDate) {
+    private List<FindContestsResponseDto> findAllContests(LocalDate nowDate) {
         List<Contest> findContests = findContestsByDate(nowDate);
         return makeContestResponseList(findContests, nowDate);
     }
 
-    public List<FindContestsResponseDto> findContestsByType(LocalDate nowDate, Integer contestType) {
+    private List<FindContestsResponseDto> findContestsByType(LocalDate nowDate, Integer contestType) {
         List<Contest> findContests = findTypeContestsByDate(nowDate, contestType);
 
         return makeContestResponseList(findContests, nowDate);
@@ -64,5 +65,9 @@ public class ContestService {
         return findContests.stream()
                 .map(data -> FindContestsResponseDto.of(data, nowDate))
                 .collect(Collectors.toList());
+    }
+
+    private Boolean isFindAllContest(Integer contestType){
+        return contestType.equals(0);
     }
 }
