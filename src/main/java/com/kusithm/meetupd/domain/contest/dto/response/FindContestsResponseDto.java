@@ -2,11 +2,14 @@ package com.kusithm.meetupd.domain.contest.dto.response;
 
 
 import com.kusithm.meetupd.domain.contest.entity.Contest;
+import com.kusithm.meetupd.domain.contest.entity.ContestType;
+import jdk.jfr.ContentType;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -20,7 +23,9 @@ public class FindContestsResponseDto {
 
     private String company;
 
-    private List<Integer> types;
+//    private List<Integer> types;
+
+    private List<String> types;
 
     private List<String> images;
 
@@ -34,7 +39,9 @@ public class FindContestsResponseDto {
                 .contestId(contest.getId())
                 .title(contest.getTitle())
                 .company(contest.getCompany())
-                .types(contest.getTypes())
+                .types(contest.getTypes().stream()
+                        .map(data ->ContestType.ofCode(data).getValue())
+                        .collect(Collectors.toList()))
                 .images(contest.getContestImages())
                 .remainDay(DAYS.between(nowDate, contest.getRecruitmentEndDate()))
                 .teamNum(contest.getTeamNum())

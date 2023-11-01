@@ -24,7 +24,6 @@ public class ContestService {
 
 
     public List<FindContestsResponseDto> findContests(LocalDate nowDate, Integer contestType) {
-        List<Contest> findContests = findContestsByDate(nowDate);
         if(contestType.equals(0)) {
             return findAllContests(nowDate);
         }
