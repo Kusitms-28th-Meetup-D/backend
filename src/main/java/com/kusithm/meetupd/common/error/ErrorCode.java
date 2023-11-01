@@ -34,6 +34,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 유저를 찾을 수 없습니다."),
     NOT_SIGN_IN_KAKAO_ID(HttpStatus.NOT_FOUND, "회원가입되지 않은 KAKAO 계정입니다. 회원가입을 진행해 주세요"),
 
+    ENUM_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 ENUM TYPE을 찾을 수 없습니다."),
+
     CONTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 공모전을 찾을 수 없습니다."),
 
 
