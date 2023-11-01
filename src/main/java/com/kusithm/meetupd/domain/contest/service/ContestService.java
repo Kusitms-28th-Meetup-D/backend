@@ -4,6 +4,7 @@ package com.kusithm.meetupd.domain.contest.service;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
+import com.kusithm.meetupd.domain.contest.entity.ContestType;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class ContestService {
             return findAllContests(nowDate);
         }
         else {
+            validContestType(contestType);
             return findContestsByType(nowDate, contestType);
         }
     }
@@ -45,20 +47,14 @@ public class ContestService {
     }
 
     private List<Contest> findContestsByDate(LocalDate nowDate) {
-        List<Contest> contests = contestRepository.findAllContestsByDate(nowDate);
-        if(contests.isEmpty()) {
-            throw new EntityNotFoundException(CONTEST_NOT_FOUND);
-        }
-        return contests;
+        return contestRepository.findAllContestsByDate(nowDate);
+
     }
 
 
     private List<Contest> findTypeContestsByDate(LocalDate nowDate, Integer contentType) {
-        List<Contest> contests = contestRepository.findContestsByDateAndType(nowDate, contentType);
-        if(contests.isEmpty()) {
-            throw new EntityNotFoundException(CONTEST_NOT_FOUND);
-        }
-        return contests;
+        return contestRepository.findContestsByDateAndType(nowDate, contentType);
+
     }
 
     private List<FindContestsResponseDto> makeContestResponseList(List<Contest> findContests, LocalDate nowDate) {
@@ -69,5 +65,9 @@ public class ContestService {
 
     private Boolean isFindAllContest(Integer contestType){
         return contestType.equals(0);
+    }
+
+    private void validContestType(Integer contestType) {
+        ContestType.ofCode(contestType);
     }
 }
