@@ -25,14 +25,14 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final TokenProvider tokenProvider;
 
-    // TODO api 추가될 때 white list url 확인해서 추가하기.
-    private static final String[] WHITE_LIST_URL  = {"/api/health","/api/auth/register","/api/auth/login", "/api/auth/reissue", "/","/api/s3/upload"
-    ,"/api/contests"};
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(WHITE_LIST_URL);
-    }
+    // white list 방식 JwtAuthFilter에서 함에 따라 주석처리
+//    private static final String[] WHITE_LIST_URL  = {"/api/health","/api/auth/register","/api/auth/login", "/api/auth/reissue", "/","/api/s3/upload"
+//    ,"/api/contests", "/swagger-ui/**", " /v3/api-docs/**"};
+//
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return (web) -> web.ignoring().requestMatchers(WHITE_LIST_URL);
+//    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
