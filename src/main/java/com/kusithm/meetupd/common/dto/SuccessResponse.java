@@ -25,4 +25,10 @@ public class SuccessResponse<T> {
         return ResponseEntity.status(success.getStatus())
                 .body(new SuccessResponse<T>(success.getStatusCode(), success.getMessage(), data));
     }
+
+
+    public static <T> ResponseEntity<SuccessResponse<T>> of(T data) {
+        return ResponseEntity.status(SuccessCode.OK.getStatus())
+                .body(new SuccessResponse<T>(SuccessCode.OK.getStatusCode(), SuccessCode.OK.getMessage(), data));
+    }
 }
