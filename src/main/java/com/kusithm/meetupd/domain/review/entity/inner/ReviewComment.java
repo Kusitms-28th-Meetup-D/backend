@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity.inner;
+package com.kusithm.meetupd.domain.review.entity.inner;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class RecommendationComment {
+public class ReviewComment {
 
     @Field(name = "team_id")
     private Long teamId;
@@ -23,8 +23,8 @@ public class RecommendationComment {
     @Builder.Default
     private LocalDateTime createAt = LocalDateTime.now();
 
-    public static RecommendationComment createRecommendationComment(Long teamId, String contestName, String comment) {
-        return RecommendationComment.builder()
+    public static ReviewComment createRecommendationComment(Long teamId, String contestName, String comment) {
+        return ReviewComment.builder()
                 .teamId(teamId)
                 .contestName(contestName)
                 .comment(comment)

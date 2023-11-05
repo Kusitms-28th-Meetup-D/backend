@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity.inner;
+package com.kusithm.meetupd.domain.review.entity.inner;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @Getter
-public class RecommendationTeamCulture {
+public class ReviewTeamCulture {
 
     @Field(name = "culture_question_type")
     private Integer cultureQuestionType;
@@ -22,15 +22,15 @@ public class RecommendationTeamCulture {
     @Builder.Default
     private Integer rightCount = 0;
 
-    public static List<RecommendationTeamCulture> initRecommendationTeamCulture() {
+    public static List<ReviewTeamCulture> initRecommendationTeamCulture() {
         List<Integer> initTeamCulturesString = Arrays.asList(0, 1, 2);
 
         /**
          * 초기 팀문화 객관식 3개 세팅
          */
-        List<RecommendationTeamCulture> initRecommendationTeamCultures = initTeamCulturesString.stream()
-                .map(it -> RecommendationTeamCulture.builder().cultureQuestionType(it).build())
+        List<ReviewTeamCulture> initReviewTeamCultures = initTeamCulturesString.stream()
+                .map(it -> ReviewTeamCulture.builder().cultureQuestionType(it).build())
                 .toList();
-        return initRecommendationTeamCultures;
+        return initReviewTeamCultures;
     }
 }

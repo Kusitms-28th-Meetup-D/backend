@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity.inner;
+package com.kusithm.meetupd.domain.review.entity.inner;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @Getter
-public class RecommendationWorkMethod {
+public class ReviewWorkMethod {
 
     @Field(name = "work_question_type")
     private Integer workQuestionType;
@@ -23,14 +23,14 @@ public class RecommendationWorkMethod {
     private Integer rightCount = 0;
 
 
-    public static List<RecommendationWorkMethod> initRecommendationWorkMethod() {
+    public static List<ReviewWorkMethod> initRecommendationWorkMethod() {
         List<Integer> initWorkMethodType = Arrays.asList(0, 1, 2);
 
         /**
          * 초기 작업방식 객관식 3개 세팅
          */
-        List<RecommendationWorkMethod> initRecommendationWorkMethods = initWorkMethodType.stream()
-                .map(it -> RecommendationWorkMethod.builder().workQuestionType(it).build())
+        List<ReviewWorkMethod> initRecommendationWorkMethods = initWorkMethodType.stream()
+                .map(it -> ReviewWorkMethod.builder().workQuestionType(it).build())
                 .toList();
         return initRecommendationWorkMethods;
     }

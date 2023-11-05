@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity.type;
+package com.kusithm.meetupd.domain.review.entity.type;
 
 import com.kusithm.meetupd.common.error.EnumNotFoundException;
 import lombok.AllArgsConstructor;
@@ -10,17 +10,17 @@ import static com.kusithm.meetupd.common.error.ErrorCode.ENUM_NOT_FOUND;
 
 @AllArgsConstructor
 @Getter
-public enum WorkMethodType {
+public enum TeamCultureType {
 
 
-    WORK_STYLE(0, "작업 스타일"),
-    RESULT_PROCESS(1, "결과, 과정 어디에 중점"),
-    WORK_LIFE_BALANCE(2, "추구하는 워라벨");
+    FEEDBACK_STYLE(0, "피드백 스타일"),
+    TEAM_STYLE(1, "추구하는 팀 스타일"),
+    PERSONALITY_STYLE(2, "외향적, 내향적");
     private final Integer code;
 
     private final String value;
-    public static WorkMethodType ofCode(Integer dbData) {
-        return Arrays.stream(WorkMethodType.values())
+    public static TeamCultureType ofCode(Integer dbData) {
+        return Arrays.stream(TeamCultureType.values())
                 .filter(v -> v.getCode().equals(dbData))
                 .findAny()
                 .orElseThrow(() -> new EnumNotFoundException(ENUM_NOT_FOUND));
