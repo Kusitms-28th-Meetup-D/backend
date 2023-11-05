@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity;
+package com.kusithm.meetupd.domain.recommendation.entity.inner;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +15,12 @@ public class RecommendationWorkMethod {
     private Integer workQuestionType;
 
     @Field(name = "left_count")
-    private Integer leftCount;
+    @Builder.Default
+    private Integer leftCount = 0;
 
     @Field(name = "right_count")
-    private Integer rightCount;
+    @Builder.Default
+    private Integer rightCount = 0;
 
 
     public static List<RecommendationWorkMethod> initRecommendationWorkMethod() {
