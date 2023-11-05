@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity;
+package com.kusithm.meetupd.domain.recommendation.entity.inner;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,13 +1,11 @@
-package com.kusithm.meetupd.domain.recommendation.entity;
+package com.kusithm.meetupd.domain.recommendation.entity.inner;
 
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 @Getter
@@ -36,4 +34,7 @@ public class RecommendationChoice {
 
     }
 
+    public void increaseCount() {
+        this.count += 1;
+    }
 }

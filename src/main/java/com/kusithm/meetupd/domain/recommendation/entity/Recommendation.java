@@ -1,6 +1,10 @@
 package com.kusithm.meetupd.domain.recommendation.entity;
 
 
+import com.kusithm.meetupd.domain.recommendation.entity.inner.RecommendationChoice;
+import com.kusithm.meetupd.domain.recommendation.entity.inner.RecommendationComment;
+import com.kusithm.meetupd.domain.recommendation.entity.inner.RecommendationTeamCulture;
+import com.kusithm.meetupd.domain.recommendation.entity.inner.RecommendationWorkMethod;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,9 +31,9 @@ public class Recommendation {
     @Builder.Default
     private List<RecommendationChoice> multipleChoices = RecommendationChoice.initRecommendationChoice(); // 객관식 평가
 
-    @Field(name = "essays")
+    @Field(name = "comments")
     @Builder.Default
-    private List<RecommendationEssay> essays = new ArrayList<>();   // 한줄평
+    private List<RecommendationComment> recommendationComments = new ArrayList<>();   // 한줄평
 
     @Field(name = "team_cultures")
     @Builder.Default
@@ -43,5 +47,9 @@ public class Recommendation {
         return Recommendation.builder()
                 .userId(userId)
                 .build();
+    }
+
+    public void incKeyWordCount(Integer keywordPosition) {
+        multipleChoices.get(keywordPosition).increaseCount();
     }
 }
