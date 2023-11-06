@@ -4,7 +4,9 @@ import com.kusithm.meetupd.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,6 +40,28 @@ public class User extends BaseEntity {
 
     @Column(name = "gender", nullable = false)
     private GENDER gender;
+
+    @Column(name="self_introduction",nullable = false)
+    private String selfIntroduction;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Major> majors = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Task> tasks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Intership> interships = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Award> awards = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Tool> tools = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Certificate> certificates = new ArrayList<>();
+
 
 
     public static User createUser(Long kakaoId, String username, Integer age, String email) {
