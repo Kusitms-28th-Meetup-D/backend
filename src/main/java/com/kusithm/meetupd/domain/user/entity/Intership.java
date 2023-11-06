@@ -17,4 +17,8 @@ public class Intership extends BaseEntity {
 
     @Column(name = "interships_name", nullable = false)
     private String intershipss;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

@@ -17,4 +17,8 @@ public class Tool extends BaseEntity {
 
     @Column(name = "tool_name", nullable = false)
     private String tool;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

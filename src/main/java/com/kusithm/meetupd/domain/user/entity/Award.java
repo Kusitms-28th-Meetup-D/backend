@@ -18,4 +18,8 @@ public class Award extends BaseEntity {
 
     @Column(name = "awards_name", nullable = false)
     private String awards;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

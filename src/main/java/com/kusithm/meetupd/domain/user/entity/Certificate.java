@@ -17,4 +17,8 @@ public class Certificate extends BaseEntity {
 
     @Column(name = "certificate_name", nullable = false)
     private String certificate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

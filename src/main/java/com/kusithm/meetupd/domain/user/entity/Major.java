@@ -17,4 +17,8 @@ public class Major extends BaseEntity {
 
     @Column(name = "major", nullable = false)
     private String major;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
