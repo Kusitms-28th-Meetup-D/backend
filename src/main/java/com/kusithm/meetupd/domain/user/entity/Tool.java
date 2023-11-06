@@ -8,13 +8,13 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Entity(name = "USER_SKILL")
-public class Skill extends BaseEntity {
+@Entity(name = "USER_TOOL")
+public class Tool extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "skill_id")
+    @Column(name = "tool_id")
     private Long id;
 
-    @Column(name = "skill", nullable = false)
-    private String skill;
+    @Column(name = "tool_name", nullable = false)
+    private String tool;
 }

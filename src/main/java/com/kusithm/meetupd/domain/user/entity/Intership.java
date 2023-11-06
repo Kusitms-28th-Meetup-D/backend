@@ -8,14 +8,13 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Entity(name = "USER_CARRER")
-public class Carrer extends BaseEntity {
-
+@Entity(name = "USER_INTERSHIPS")
+public class Intership extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "carrer_id")
+    @Column(name = "interships_id")
     private Long id;
 
-    @Column(name = "carrer", nullable = false)
-    private String carrer;
+    @Column(name = "interships_name", nullable = false)
+    private String intershipss;
 }
