@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Entity(name = "USER_TOOL")
+@Entity(name = "USER_CERTIFICATE")
 public class Certificate extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
