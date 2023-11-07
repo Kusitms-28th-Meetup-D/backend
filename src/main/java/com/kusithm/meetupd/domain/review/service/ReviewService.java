@@ -1,8 +1,8 @@
 package com.kusithm.meetupd.domain.review.service;
 
-import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
+import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
 import com.kusithm.meetupd.domain.review.entity.Review;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.kusithm.meetupd.common.error.ErrorCode.DUPLICATE_USER_REVIEW_TEAM;
 import static com.kusithm.meetupd.common.error.ErrorCode.USER_RECOMMENDATION_NOT_FOUND;
 import static com.kusithm.meetupd.domain.review.entity.inner.ReviewComment.createRecommendationComment;
 
@@ -55,6 +54,10 @@ public class ReviewService {
         waitReviews.forEach(this::uploadOrWaitReview);
         String uploadResultString = updateSendUserReviews(sendUserId, getTeamId(request));
         return UploadReviewResponseDto.of(uploadResultString);
+    }
+
+    public GetIsUserReviewTeamResponseDto isUserReviewThisTeam(Long userId, Long teamId) {
+        return GetIsUserReviewTeamResponseDto.of(checkUserReviewThisTeam(userId, teamId));
     }
 
     private Long getTeamId(UploadReviewRequestDto request) {
