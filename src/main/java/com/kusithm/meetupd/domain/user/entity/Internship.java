@@ -16,7 +16,7 @@ public class Internship extends BaseEntity {
     private Long id;
 
     @Column(name = "internships_name", nullable = false)
-    private String interships;
+    private String internships;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
