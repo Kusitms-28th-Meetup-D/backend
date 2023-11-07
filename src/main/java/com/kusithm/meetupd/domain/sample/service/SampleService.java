@@ -1,6 +1,6 @@
 package com.kusithm.meetupd.domain.sample.service;
 
-import com.kusithm.meetupd.common.error.DuplicateException;
+import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.domain.sample.dto.response.CreateSampleResponseDto;
 import com.kusithm.meetupd.domain.sample.entity.Sample;
 import com.kusithm.meetupd.domain.sample.mysql.SampleRepository;
@@ -26,7 +26,7 @@ public class SampleService {
 
     private void validateDuplicateText(String text) {
         if(sampleRepository.existsByText(text)) {
-            throw new DuplicateException(DUPLICATE_SAMPLE_TEXT);
+            throw new ConflictException(DUPLICATE_SAMPLE_TEXT);
         }
     }
     private Sample saveText(String text) {
