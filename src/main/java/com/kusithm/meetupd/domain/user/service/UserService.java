@@ -38,12 +38,6 @@ public class UserService {
 
     public UserMypageResponseDto getMypageUser(Long userId) {
         User findUser = getUserByUserId(userId);
-        List<String> task = findUser.getTasks().stream().map(Task::getTask).collect(Collectors.toList());
-        List<String> major = findUser.getMajors().stream().map(Major::getMajor).collect(Collectors.toList());
-        List<String> internships= findUser.getInternships().stream().map(Internship::getInternships).collect(Collectors.toList());
-        List<String> awards= findUser.getAwards().stream().map(Award::getAwards).collect(Collectors.toList());
-        List<String> tools= findUser.getTools().stream().map(Tool::getTool).collect(Collectors.toList());
-        List<String> certificates= findUser.getCertificates().stream().map(Certificate::getCertificate).collect(Collectors.toList());
-        return new UserMypageResponseDto(findUser,task,major,internships,awards,tools,certificates);
+        return new UserMypageResponseDto(findUser);
     }
 }
