@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.recommendation.entity.type;
+package com.kusithm.meetupd.domain.review.entity.type;
 
 import com.kusithm.meetupd.common.error.EnumNotFoundException;
 import lombok.AllArgsConstructor;
