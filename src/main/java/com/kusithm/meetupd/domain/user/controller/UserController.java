@@ -3,6 +3,7 @@ package com.kusithm.meetupd.domain.user.controller;
 import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
 import com.kusithm.meetupd.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,11 @@ public class UserController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
+    @GetMapping("/myPage")
+    public ResponseEntity<SuccessResponse<UserMypageResponseDto>> getMypageUser(@RequestParam Long userId) {
+        UserMypageResponseDto response = userService.getMypageUser(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
 
 
 }
