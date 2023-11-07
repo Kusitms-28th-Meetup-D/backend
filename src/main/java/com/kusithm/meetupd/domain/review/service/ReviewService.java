@@ -1,10 +1,12 @@
 package com.kusithm.meetupd.domain.review.service;
 
+import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
 import com.kusithm.meetupd.domain.review.entity.Review;
+import com.kusithm.meetupd.domain.review.entity.UserReviewedTeam;
 import com.kusithm.meetupd.domain.review.entity.WaitReview;
 import com.kusithm.meetupd.domain.review.entity.inner.ReviewComment;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectKeyword;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.kusithm.meetupd.common.error.ErrorCode.DUPLICATE_USER_REVIEW_TEAM;
 import static com.kusithm.meetupd.common.error.ErrorCode.USER_RECOMMENDATION_NOT_FOUND;
 import static com.kusithm.meetupd.domain.review.entity.inner.ReviewComment.createRecommendationComment;
 
@@ -45,10 +48,17 @@ public class ReviewService {
     }
 
     public UploadReviewResponseDto uploadReviews(Long sendUserId, UploadReviewRequestDto request) {
+        // TODO 개발 테스트 편의를 위해 이미 유저가 팀에 리뷰를 작성했는지 여부는 주석 처리 했습니다.
+//        if(checkUserReviewThisTeam(sendUserId, getTeamId(request)))
+//            throw new ConflictException(DUPLICATE_USER_REVIEW_TEAM);
         List<WaitReview> waitReviews = makeWaitReviewListFromUploadRequest(request);
         waitReviews.forEach(this::uploadOrWaitReview);
-        String uploadResultString = updateSendUserReviews(sendUserId, request.getUploadReviews().get(0).getTeamId());
+        String uploadResultString = updateSendUserReviews(sendUserId, getTeamId(request));
         return UploadReviewResponseDto.of(uploadResultString);
+    }
+
+    private Long getTeamId(UploadReviewRequestDto request) {
+        return request.getUploadReviews().get(0).getTeamId();
     }
 
     private Review getReviewByUserId(Long userId) {
@@ -75,11 +85,16 @@ public class ReviewService {
     }
 
     private String updateSendUserReviews(Long userId, Long teamId) {
+        saveUserReviewedTeam(userId, teamId);
         List<WaitReview> userWaitReviews = getWaitReviewsByUserAndTeam(userId, teamId);
         userWaitReviews.forEach(this::uploadReview);
         userWaitReviews.forEach(this::deleteWaitReview);
 
         return userWaitReviews.isEmpty() ? "추천사를 성공적으로 등록했습니다.": "추천사를 성공적으로 등록했습니다.\n회원에게 새로운 추천사가 등록되었습니다.";
+    }
+
+    private void saveUserReviewedTeam(Long userId, Long teamId) {
+        userReviewedTeamRepository.save(UserReviewedTeam.of(userId, teamId));
     }
 
     private List<WaitReview> getWaitReviewsByUserAndTeam(Long userId, Long teamId) {
