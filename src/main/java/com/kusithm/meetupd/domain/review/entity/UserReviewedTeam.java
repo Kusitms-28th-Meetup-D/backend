@@ -1,15 +1,11 @@
 package com.kusithm.meetupd.domain.review.entity;
 
-import com.kusithm.meetupd.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
+import lombok.*;
 
-import java.time.LocalDateTime;
-
-import static org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters.*;
-
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Getter
 @Entity(name = "user_reviewed_team")
 public class UserReviewedTeam {
@@ -35,4 +31,11 @@ public class UserReviewedTeam {
 //    @Column(name = "reviewed_at", updatable = false)
 //    @Convert(converter = LocalDateTimeConverter.class)
 //    private LocalDateTime reviewedAt;
+
+    public static UserReviewedTeam of(Long userId, Long teamId) {
+        return UserReviewedTeam.builder()
+                .userId(userId)
+                .teamId(teamId)
+                .build();
+    }
 }

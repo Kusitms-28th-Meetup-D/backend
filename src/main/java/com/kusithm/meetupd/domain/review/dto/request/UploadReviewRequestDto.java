@@ -6,6 +6,7 @@ import java.util.List;
 
 @Getter
 public class UploadReviewRequestDto {
+    private Long sendUserId;
 
     private List<UploadReviewDto> uploadReviews;
 

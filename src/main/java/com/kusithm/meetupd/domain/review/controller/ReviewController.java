@@ -26,8 +26,8 @@ public class ReviewController {
     }
 
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@RequestParam Long userId, @RequestBody UploadReviewRequestDto request) {
-        UploadReviewResponseDto response = reviewService.uploadReviews(userId, request);
+    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@RequestBody UploadReviewRequestDto request) {
+        UploadReviewResponseDto response = reviewService.uploadReviews(request.getSendUserId(), request);
         return SuccessResponse.of(SuccessCode.CREATED, response);
     }
 
