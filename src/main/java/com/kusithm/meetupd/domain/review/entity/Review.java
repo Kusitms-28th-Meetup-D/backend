@@ -5,9 +5,9 @@ import com.kusithm.meetupd.domain.review.entity.inner.ReviewChoice;
 import com.kusithm.meetupd.domain.review.entity.inner.ReviewComment;
 import com.kusithm.meetupd.domain.review.entity.inner.ReviewTeamCulture;
 import com.kusithm.meetupd.domain.review.entity.inner.ReviewWorkMethod;
-import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Getter
 @Builder
-@Document("review")
+@Document(collection = "recommendation")
 public class Review {
 
     @Id
@@ -31,7 +31,7 @@ public class Review {
     @Builder.Default
     private List<ReviewChoice> multipleChoices = ReviewChoice.initRecommendationChoice(); // 객관식 평가
 
-    @Field(name = "comments")
+    @Field(name = "essays")
     @Builder.Default
     private List<ReviewComment> reviewComments = new ArrayList<>();   // 한줄평
 
