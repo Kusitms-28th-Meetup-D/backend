@@ -47,11 +47,14 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Major> majors = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private Location location;
+
     @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Task> tasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private List<Intership> interships = new ArrayList<>();
+    private List<Internship> internships = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Award> awards = new ArrayList<>();
