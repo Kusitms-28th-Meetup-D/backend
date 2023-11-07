@@ -8,13 +8,17 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Entity(name = "USER_SKILL")
-public class Skill extends BaseEntity {
+@Entity(name = "USER_INTERNSHIPS")
+public class Internship extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "skill_id")
+    @Column(name = "internships_id")
     private Long id;
 
-    @Column(name = "skill", nullable = false)
-    private String skill;
+    @Column(name = "internships_name", nullable = false)
+    private String internships;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
