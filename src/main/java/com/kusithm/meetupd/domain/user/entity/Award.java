@@ -9,13 +9,17 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity(name = "USER_CARRER")
-public class Carrer extends BaseEntity {
+public class Award extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "carrer_id")
+    @Column(name = "awards_id")
     private Long id;
 
-    @Column(name = "carrer", nullable = false)
-    private String carrer;
+    @Column(name = "awards_name", nullable = false)
+    private String awards;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

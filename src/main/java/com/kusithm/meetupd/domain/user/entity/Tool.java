@@ -8,15 +8,15 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Entity(name = "USER_MAJOR")
-public class Major extends BaseEntity {
+@Entity(name = "USER_TOOL")
+public class Tool extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "major_id")
+    @Column(name = "tool_id")
     private Long id;
 
-    @Column(name = "major", nullable = false)
-    private String major;
+    @Column(name = "tool_name", nullable = false)
+    private String tool;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
