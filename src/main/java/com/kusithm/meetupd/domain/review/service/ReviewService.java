@@ -93,7 +93,7 @@ public class ReviewService {
         userWaitReviews.forEach(this::uploadReview);
         userWaitReviews.forEach(this::deleteWaitReview);
 
-        return userWaitReviews.isEmpty() ? "추천사를 성공적으로 등록했습니다.": "추천사를 성공적으로 등록했습니다.\n회원에게 새로운 추천사가 등록되었습니다.";
+        return userWaitReviews.isEmpty() ? "추천사를 성공적으로 등록했습니다.": "추천사를 성공적으로 등록했습니다.\n회원님에게 새로운 추천사가 등록되었습니다.";
     }
 
     private void saveUserReviewedTeam(Long userId, Long teamId) {
