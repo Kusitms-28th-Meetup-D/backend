@@ -20,6 +20,7 @@ public class MongoDbConfig {
 
     private final MongoMappingContext mongoMappingContext;
 
+    // 데이터 저장시 "_class" 필드가 자동 추가되는 현상 방지를 위한 설정
     @Bean
     public MappingMongoConverter mappingMongoConverter(MongoDatabaseFactory mongoDatabaseFactory,
                                                        MongoMappingContext mongoMappingContext) {
@@ -28,4 +29,5 @@ public class MongoDbConfig {
         converter.setTypeMapper(new DefaultMongoTypeMapper(null));
         return converter;
     }
+
 }

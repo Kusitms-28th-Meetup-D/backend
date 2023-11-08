@@ -1,7 +1,7 @@
 package com.kusithm.meetupd.domain.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.kusithm.meetupd.common.error.DuplicateException;
+import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.UnauthorizedException;
 import com.kusithm.meetupd.common.jwt.TokenProvider;
@@ -82,7 +82,7 @@ public class AuthService {
 
     private void validateNotAlreadySignIn(Long kakaoId) {
         if(userRepository.existsByKakaoId(kakaoId)){
-            throw new DuplicateException(DUPLICATE_KAKAO_ID);
+            throw new ConflictException(DUPLICATE_KAKAO_ID);
         }
     }
 
