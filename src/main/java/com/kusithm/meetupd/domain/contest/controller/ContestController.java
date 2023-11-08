@@ -32,4 +32,11 @@ public class ContestController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
+    // 공모전 검색어로 조회 API
+    @GetMapping("/search")
+    public ResponseEntity<SuccessResponse<List<FindContestsResponseDto>>> findContests (@RequestParam String searchText) {
+        List<FindContestsResponseDto> response = contestService.findContestsBySearchText(searchText);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
 }
