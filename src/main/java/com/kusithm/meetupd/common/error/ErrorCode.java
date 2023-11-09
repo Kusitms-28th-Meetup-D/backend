@@ -37,6 +37,7 @@ public enum ErrorCode {
     ENUM_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 ENUM TYPE을 찾을 수 없습니다."),
 
     CONTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 공모전을 찾을 수 없습니다."),
+    USER_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 유저의 추천사를 찾을 수 없습니다."),
 
 
 
@@ -46,6 +47,7 @@ public enum ErrorCode {
     DUPLICATE_SAMPLE_TEXT(HttpStatus.CONFLICT, "이미 존재하는 TEXT입니다."),
     DUPLICATE_USER_NAME(HttpStatus.CONFLICT, "이미 존재하는 유저 이름 입니다."),
     DUPLICATE_KAKAO_ID(HttpStatus.CONFLICT, "이미 회원가입 된 카카오 계정 입니다."),
+    DUPLICATE_USER_REVIEW_TEAM(HttpStatus.CONFLICT, "이미 회원님은 해당 팀에 리뷰를 남겼습니다."),
 
     /**
      *  500 INTERNAL SERVER ERROR
