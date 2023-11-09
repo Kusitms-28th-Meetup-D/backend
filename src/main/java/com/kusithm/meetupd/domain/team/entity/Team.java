@@ -4,10 +4,13 @@ package com.kusithm.meetupd.domain.team.entity;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.kusithm.meetupd.common.entity.BaseEntity;
 import com.kusithm.meetupd.domain.user.entity.GENDER;
+import com.kusithm.meetupd.domain.user.entity.Tool;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,6 +38,9 @@ public class Team extends BaseEntity {
 
     @Column(name = "progress", nullable = false)
     private Integer progress; //진행상황
+
+    @OneToMany(mappedBy = "team",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<TeamUser> teamUsers = new ArrayList<>();
 
 
 }

@@ -1,6 +1,7 @@
 package com.kusithm.meetupd.domain.user.entity;
 
 import com.kusithm.meetupd.common.entity.BaseEntity;
+import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -64,6 +65,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Certificate> certificates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<TeamUser> teamUsers = new ArrayList<>();
 
 
 
