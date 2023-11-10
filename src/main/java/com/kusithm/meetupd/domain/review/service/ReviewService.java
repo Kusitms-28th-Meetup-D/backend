@@ -1,6 +1,8 @@
 package com.kusithm.meetupd.domain.review.service;
 
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
+import com.kusithm.meetupd.domain.review.aws.AWSFeignClient;
+import com.kusithm.meetupd.domain.review.aws.dto.request.SendEmailByAWSFeignRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
@@ -35,6 +37,7 @@ public class ReviewService {
     private final WaitReviewRepository waitReviewRepository;
     private final UserReviewedTeamRepository userReviewedTeamRepository;
     private final MongoTemplate mongoTemplate;
+    private final AWSFeignClient awsFeignClient;
 
     public void createUserEmptyReview(Long userId){
         Review recommendation = Review.creatEmptyReview(userId);
@@ -85,6 +88,11 @@ public class ReviewService {
             // 아직 리뷰받는 유저가 팀에 추천사를 남기지 않았다면 대기 리뷰 document에 저장
             uploadWaitReview(waitReview);
         }
+
+        // TODO 이메일로 인증 ~~님이 회원님에게 추천사를 작성했어요 어서 확인해보세요! 보내야함.
+        // SendEmailByAWSFeignRequestDto.of(보낼 유저 이메일 , 팀 이름)
+//        SendEmailByAWSFeignRequestDto request = SendEmailByAWSFeignRequestDto.of("ojy09291@naver.com", "내팀팀팀");
+//        awsFeignClient.sendReviewEmail(request);
     }
 
     private String updateSendUserReviews(Long userId, Long teamId) {
@@ -122,7 +130,6 @@ public class ReviewService {
             addCommentInUpdate(update, createComment);
         }
 
-        // TODO 이메일로 인증 ~~님이 회원님에게 추천사를 작성했어요 어서 확인해보세요! 보내야함.
         mongoTemplate.updateMulti(query, update, Review.class);
     }
 

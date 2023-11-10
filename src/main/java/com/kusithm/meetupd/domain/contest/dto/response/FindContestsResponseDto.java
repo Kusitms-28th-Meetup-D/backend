@@ -47,5 +47,11 @@ public class FindContestsResponseDto {
                 .teamNum(contest.getTeamNum())
                 .build();
     }
+
+    public static List<FindContestsResponseDto> createListOf(List<Contest> contests, LocalDate nowDate) {
+        return contests.stream()
+                .map(data -> FindContestsResponseDto.of(data, nowDate))
+                .collect(Collectors.toList());
+    }
 }
 
