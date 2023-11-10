@@ -11,6 +11,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
 
@@ -89,5 +90,11 @@ public class ContestService {
 
     private void validContestType(Integer contestType) {
         ContestType.ofCode(contestType);
+    }
+
+    private void findContestTitleByIdTest(String contestId) {
+        // new ObjectId를 통해 String을 감싸서 보내줘야합니다.
+        Contest findContest = contestRepository.findContestById(new ObjectId(contestId));
+        findContest.getTitle();
     }
 }
