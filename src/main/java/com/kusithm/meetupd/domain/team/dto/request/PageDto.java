@@ -1,4 +1,4 @@
-package com.kusithm.meetupd.domain.team.dto.response;
+package com.kusithm.meetupd.domain.team.dto.request;
 
 import lombok.*;
 import org.springframework.data.domain.PageRequest;
