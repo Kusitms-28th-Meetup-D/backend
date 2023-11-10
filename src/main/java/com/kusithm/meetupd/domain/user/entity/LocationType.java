@@ -12,24 +12,22 @@ import static com.kusithm.meetupd.common.error.ErrorCode.ENUM_NOT_FOUND;
 @AllArgsConstructor
 @Getter
 public enum LocationType {
-    SEOUL(1, "서울"),
-    BUSAN(2, "부산"),
-    DAEGU(3, "대구"),
-    INCHEON(4, "인천"),
-    GWANGJU(5,"광주"),
-    DAEJEON(6, "대전"),
-    ULSAN(7, "울산"),
-    SEJEONG(8, "세종"),
-    GYEONGGI(9, "경기"),
-    CHUNGBUK(10, "충북"),
-    CHUNGNAM(11, "충남"),
-    JEONBUK(12, "전북"),
-    JEONNAM(13, "전남"),
-    GYEONGBUK(14, "경북"),
-    GYEONGNAM(15, "경남"),
-    JEJU(16, "제주"),
-    GANGNAM(17
-            , "강남");
+    SEOUL(1, "서울특별시"),
+    INCHEON(2, "인천광역시"),
+    DAEJEON(3, "대전광역시"),
+    GWANGJU(4,"광주광역시"),
+    DAEGU(5, "대구광역시"),
+    ULSAN(6, "울산광역시"),
+    BUSAN(7, "부산광역시"),
+    GYEONGGI(8, "경기도"),
+    GANGWONDO(9,"강원도"),
+    CHUNGBUK(10, "충청북도"),
+    CHUNGNAM(11, "충청남도"),
+    JEONBUK(12, "전라북도"),
+    JEONNAM(13, "전라남도"),
+    GYEONGBUK(14, "경상북도"),
+    GYEONGNAM(15, "경상남도"),
+    JEJU(16, "제주특별자치도");
 
     private final Integer code;
 
