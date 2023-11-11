@@ -4,6 +4,8 @@ import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
+import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.response.BuyUserTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
 import com.kusithm.meetupd.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +31,10 @@ public class UserController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
+    @PatchMapping("/tickets/{userId}/add")
+    public ResponseEntity<SuccessResponse<BuyUserTicketResponseDto>> buyUserTicket(@UserId Long userId, @RequestBody BuyUserTicketRequestDto request) {
+        BuyUserTicketResponseDto response = userService.buyUserTicket(userId, request);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
 
 }

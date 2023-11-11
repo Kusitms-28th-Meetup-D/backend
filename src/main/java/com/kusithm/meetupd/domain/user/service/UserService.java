@@ -3,6 +3,8 @@ package com.kusithm.meetupd.domain.user.service;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
+import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.response.BuyUserTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
 import com.kusithm.meetupd.domain.user.entity.*;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
@@ -30,14 +32,26 @@ public class UserService {
                 .username(findUser.getUsername())
                 .build();
     }
+
+    public UserMypageResponseDto getMypageUser(Long userId) {
+        User findUser = getUserByUserId(userId);
+        return new UserMypageResponseDto(findUser);
+    }
+
+    public BuyUserTicketResponseDto buyUserTicket(Long userId, BuyUserTicketRequestDto request) {
+        User findUser = getUserByUserId(userId);
+        addUserTicket(findUser, request.getBuyAmount());
+        return BuyUserTicketResponseDto.of(findUser.getTicketCount());
+    }
+
     private User getUserByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         return user;
     }
 
-    public UserMypageResponseDto getMypageUser(Long userId) {
-        User findUser = getUserByUserId(userId);
-        return new UserMypageResponseDto(findUser);
+    private void addUserTicket(User user, Integer ticketAmount) {
+        user.ticket.addTicketCount(ticketAmount);
     }
+
 }
