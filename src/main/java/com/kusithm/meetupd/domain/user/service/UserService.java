@@ -3,16 +3,14 @@ package com.kusithm.meetupd.domain.user.service;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
+import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
 import com.kusithm.meetupd.domain.user.entity.*;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -30,14 +28,31 @@ public class UserService {
                 .username(findUser.getUsername())
                 .build();
     }
+
+    public UserMypageResponseDto getMypageUser(Long userId) {
+        User findUser = getUserByUserId(userId);
+        return new UserMypageResponseDto(findUser);
+    }
+
+    public UserTicketCountResponseDto buyUserTicket(Long userId, BuyUserTicketRequestDto request) {
+        User findUser = getUserByUserId(userId);
+        addUserTicket(findUser, request.getBuyAmount());
+        return UserTicketCountResponseDto.of(findUser.getTicketCount());
+    }
+
+    public UserTicketCountResponseDto getUserTicketCount(Long userId) {
+        User findUser = getUserByUserId(userId);
+        return UserTicketCountResponseDto.of(findUser.getTicketCount());
+    }
+
     private User getUserByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         return user;
     }
 
-    public UserMypageResponseDto getMypageUser(Long userId) {
-        User findUser = getUserByUserId(userId);
-        return new UserMypageResponseDto(findUser);
+    private void addUserTicket(User user, Integer ticketAmount) {
+        user.ticket.addTicketCount(ticketAmount);
     }
+
 }

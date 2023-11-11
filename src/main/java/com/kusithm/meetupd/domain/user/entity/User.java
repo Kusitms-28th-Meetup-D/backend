@@ -11,6 +11,7 @@ import java.util.List;
 import static com.kusithm.meetupd.domain.user.entity.Location.craeteLocation;
 import static com.kusithm.meetupd.domain.user.entity.Major.createMajor;
 import static com.kusithm.meetupd.domain.user.entity.Task.createTask;
+import static com.kusithm.meetupd.domain.user.entity.Ticket.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -39,37 +40,39 @@ public class User extends BaseEntity {
     @Column(name="self_introduction",nullable = false)
     private String selfIntroduction;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Major> majors = new ArrayList<>(); // 전공
 
-    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Location location;  // 지역
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Task> tasks = new ArrayList<>();   //희망 직무
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Internship> internships = new ArrayList<>();   // 인턴쉽
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Award> awards = new ArrayList<>(); // 수상내역
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Tool> tools = new ArrayList<>();   // 사용 툴
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Certificate> certificates = new ArrayList<>(); // 자격증
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public Ticket ticket;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<TeamUser> teamUsers = new ArrayList<>();
-
 
     public static User createRegisterUser(String username,
                                   Integer location,
@@ -97,11 +100,18 @@ public class User extends BaseEntity {
         Task createdTask = createTask(task);
         createdTask.updateUser(user);
 
+        Ticket ticket = createInitTicket();
+        ticket.changeUser(user);
+
         return user;
     }
 
     public void updateLocation(Location location) {
         this.location = location;
+    }
+
+    public void updateTicket(Ticket ticket) {
+        this.ticket = ticket;
     }
 
     public void addMajor(Major major) {
@@ -110,5 +120,9 @@ public class User extends BaseEntity {
 
     public void addTask(Task task) {
         this.tasks.add(task);
+    }
+
+    public Integer getTicketCount() {
+        return this.ticket.getCount();
     }
 }
