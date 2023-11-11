@@ -18,6 +18,7 @@ import com.kusithm.meetupd.domain.auth.kakao.KakaoAccessToken;
 import com.kusithm.meetupd.domain.auth.kakao.KakaoFeignClient;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetIdResponseDto;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetUserInfoResponseDto;
+import com.kusithm.meetupd.domain.user.entity.Location;
 import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.common.redis.entity.RefreshToken.createRefreshToken;
 import static com.kusithm.meetupd.domain.auth.kakao.KakaoAccessToken.createKakaoAccessToken;
-import static com.kusithm.meetupd.domain.user.entity.User.createUser;
+import static com.kusithm.meetupd.domain.user.entity.User.createRegisterUser;
 
 @RequiredArgsConstructor
 @Transactional
@@ -41,15 +42,19 @@ public class AuthService {
     public KakaoRegisterResponseDto register(KakaoRegisterRequestDto request) {
 
         KakaoAccessToken kakaoAccessToken = createKakaoAccessToken(request.getKakaoAccessToken());
-        KakaoGetUserInfoResponseDto kakaoUserInfo = kakaoFeignClient.getKakaoUserEmailByAccessToken(kakaoAccessToken.getAccessTokenWithTokenType());
+        KakaoGetUserInfoResponseDto kakaoUserInfo = getKakaoUserInfoByAccessToken(kakaoAccessToken);
         // 이미 회원가입 된 유저인지 확인
         validateNotAlreadySignIn(kakaoUserInfo.getId());
 
         //아니라면 새로 유저 생성해줌
-        User user = createUserByKakaoUserInfo(kakaoUserInfo, request.getUsername(), request.getAge());
+        User user = createUserByKakaoUserInfo(kakaoUserInfo, request);
         User savedUser = userRepository.save(user);
 
         return KakaoRegisterResponseDto.of(savedUser.getId(), savedUser.getUsername());
+    }
+
+    private KakaoGetUserInfoResponseDto getKakaoUserInfoByAccessToken(KakaoAccessToken kakaoAccessToken) {
+        return kakaoFeignClient.getKakaoUserEmailByAccessToken(kakaoAccessToken.getAccessTokenWithTokenType());
     }
 
     public KakaoLoginResponseDto kakaoLogin(KakaoLoginRequestDto request) {
@@ -86,8 +91,17 @@ public class AuthService {
         }
     }
 
-    private User createUserByKakaoUserInfo(KakaoGetUserInfoResponseDto kakaoUserInfo, String username, Integer age) {
-        return createUser(kakaoUserInfo.getId(), username, age, kakaoUserInfo.getKakao_account().getEmail());
+    private User createUserByKakaoUserInfo(KakaoGetUserInfoResponseDto kakaoUserInfo, KakaoRegisterRequestDto request) {
+        return createRegisterUser(
+                request.getUsername(),
+                request.getLocation(),
+                request.getMajor(),
+                request.getTask(),
+                request.getSelfIntroduce(),
+                kakaoUserInfo.getId(),
+                kakaoUserInfo.getKakao_account().getEmail(),
+                kakaoUserInfo.getKakao_account().getProfile().getProfile_image_url()
+        );
     }
 
     private KakaoGetIdResponseDto getKakaoIdByAccessToken(String kakaoAccessToken) {
