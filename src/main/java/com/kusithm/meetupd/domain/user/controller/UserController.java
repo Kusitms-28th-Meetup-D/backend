@@ -37,4 +37,9 @@ public class UserController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
+    @GetMapping("/tickets/count")
+    public ResponseEntity<SuccessResponse<UserTicketCountResponseDto>> getUserTicketCount(@UserId Long userId) {
+        UserTicketCountResponseDto response = userService.getUserTicketCount(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
 }

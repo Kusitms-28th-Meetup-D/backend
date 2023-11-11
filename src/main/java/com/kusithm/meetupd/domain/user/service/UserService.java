@@ -40,6 +40,11 @@ public class UserService {
         return UserTicketCountResponseDto.of(findUser.getTicketCount());
     }
 
+    public UserTicketCountResponseDto getUserTicketCount(Long userId) {
+        User findUser = getUserByUserId(userId);
+        return UserTicketCountResponseDto.of(findUser.getTicketCount());
+    }
+
     private User getUserByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
