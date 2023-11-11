@@ -11,6 +11,7 @@ public enum ErrorCode {
     /**
      *  400 Bad Request
      */
+    ALREADY_USER_USE_TICKET(HttpStatus.BAD_REQUEST, "이미 해당 유저에게 티켓을 사용했습니다."),
 
     /**
      *  401 Unauthorized
@@ -25,6 +26,7 @@ public enum ErrorCode {
      *  403 Forbidden
      */
     WRONG_USER_PASSWORD(HttpStatus.FORBIDDEN, "입력하신 비밀번호가 올바르지 않습니다."),
+    USER_NOT_HAVE_ENOUGH_TICKET(HttpStatus.FORBIDDEN, "보유한 티켓의 수가 부족합니다. 티켓을 충전해주세요."),
 
 
     /**

@@ -68,7 +68,7 @@ public class User extends BaseEntity {
     private List<Certificate> certificates = new ArrayList<>(); // 자격증
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    public Ticket ticket;
+    private Ticket ticket;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

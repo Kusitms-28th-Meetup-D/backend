@@ -5,6 +5,9 @@ import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
 import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.request.SpendUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.response.IsUserUseTicketResponseDto;
+import com.kusithm.meetupd.domain.user.dto.response.SpendUserTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
 import com.kusithm.meetupd.domain.user.service.UserService;
@@ -40,6 +43,18 @@ public class UserController {
     @GetMapping("/tickets/count")
     public ResponseEntity<SuccessResponse<UserTicketCountResponseDto>> getUserTicketCount(@UserId Long userId) {
         UserTicketCountResponseDto response = userService.getUserTicketCount(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    @GetMapping("/tickets/check-use")
+    public ResponseEntity<SuccessResponse<IsUserUseTicketResponseDto>> checkUserUseTicketToThisUser(@UserId Long userId, @RequestParam Long targetUserId) {
+        IsUserUseTicketResponseDto response = userService.checkUserUseTicketToThisUser(userId, targetUserId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    @PostMapping("/tickets/use")
+    public ResponseEntity<SuccessResponse<SpendUserTicketResponseDto>> spendUserTicket(@UserId Long userId, @RequestBody SpendUserTicketRequestDto request) {
+        SpendUserTicketResponseDto response = userService.spendUserTicket(userId, request);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 }
