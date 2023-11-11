@@ -44,7 +44,7 @@ public class UserMypageResponseDto {
         this.profile_image = user.getProfileImage();
         this.username = user.getUsername();
         this.task = user.getTasks().stream().map(Task::getTask).collect(Collectors.toList());
-        this.location = LocationType.ofCode(user.getLocation().getLocationName()).getValue();
+        this.location = LocationType.ofCode(user.getLocation().getLocationType()).getValue();
         this.major =user.getMajors().stream().map(Major::getMajor).collect(Collectors.toList());
         this.selfIntroduction = user.getSelfIntroduction();
         this.internships = user.getInternships().stream().map(Internship::getInternships).collect(Collectors.toList());
