@@ -4,17 +4,13 @@ import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
 import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
-import com.kusithm.meetupd.domain.user.dto.response.BuyUserTicketResponseDto;
+import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
 import com.kusithm.meetupd.domain.user.entity.*;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -38,10 +34,10 @@ public class UserService {
         return new UserMypageResponseDto(findUser);
     }
 
-    public BuyUserTicketResponseDto buyUserTicket(Long userId, BuyUserTicketRequestDto request) {
+    public UserTicketCountResponseDto buyUserTicket(Long userId, BuyUserTicketRequestDto request) {
         User findUser = getUserByUserId(userId);
         addUserTicket(findUser, request.getBuyAmount());
-        return BuyUserTicketResponseDto.of(findUser.getTicketCount());
+        return UserTicketCountResponseDto.of(findUser.getTicketCount());
     }
 
     private User getUserByUserId(Long userId) {

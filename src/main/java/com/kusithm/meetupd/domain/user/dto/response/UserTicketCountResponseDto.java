@@ -6,12 +6,12 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class BuyUserTicketResponseDto {
+public class UserTicketCountResponseDto {
 
     private Integer ticketCount;
 
-    public static BuyUserTicketResponseDto of(Integer ticketCount) {
-        return BuyUserTicketResponseDto.builder()
+    public static UserTicketCountResponseDto of(Integer ticketCount) {
+        return UserTicketCountResponseDto.builder()
                 .ticketCount(ticketCount)
                 .build();
     }
