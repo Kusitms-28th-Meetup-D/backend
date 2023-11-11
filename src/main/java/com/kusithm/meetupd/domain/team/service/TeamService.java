@@ -8,6 +8,7 @@ import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 
@@ -55,4 +57,7 @@ public class TeamService {
     }
 
 
+    public void findTeamDetail(long teamId) {
+        Optional<Team> team = teamRepository.findById(teamId);
+    }
 }
