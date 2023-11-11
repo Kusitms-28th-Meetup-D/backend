@@ -68,8 +68,7 @@ public class User extends BaseEntity {
     private List<Certificate> certificates = new ArrayList<>(); // 자격증
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    public Ticket ticket = createInitTicket();
+    public Ticket ticket;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
@@ -101,11 +100,18 @@ public class User extends BaseEntity {
         Task createdTask = createTask(task);
         createdTask.updateUser(user);
 
+        Ticket ticket = createInitTicket();
+        ticket.changeUser(user);
+
         return user;
     }
 
     public void updateLocation(Location location) {
         this.location = location;
+    }
+
+    public void updateTicket(Ticket ticket) {
+        this.ticket = ticket;
     }
 
     public void addMajor(Major major) {

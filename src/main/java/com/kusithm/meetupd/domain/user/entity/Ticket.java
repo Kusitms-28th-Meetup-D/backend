@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Entity
+@Entity(name = "USER_TICKET")
 public class Ticket extends BaseEntity {
 
     @Id
@@ -20,10 +20,19 @@ public class Ticket extends BaseEntity {
     @Column(name = "count")
     private Integer count;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public static Ticket createInitTicket() {
         return Ticket.builder()
                 .count(0)
                 .build();
+    }
+
+    public void changeUser(User user) {
+        this.user = user;
+        user.updateTicket(this);
     }
 
     public void addTicketCount(Integer amount) {
