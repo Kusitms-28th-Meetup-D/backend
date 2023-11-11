@@ -18,6 +18,8 @@ import com.kusithm.meetupd.domain.auth.kakao.KakaoAccessToken;
 import com.kusithm.meetupd.domain.auth.kakao.KakaoFeignClient;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetIdResponseDto;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetUserInfoResponseDto;
+import com.kusithm.meetupd.domain.review.entity.Review;
+import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
 import com.kusithm.meetupd.domain.user.entity.Location;
 import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
@@ -34,9 +36,11 @@ import static com.kusithm.meetupd.domain.user.entity.User.createRegisterUser;
 @Transactional
 @Service
 public class AuthService {
+
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ReviewRepository reviewRepository;
     private final KakaoFeignClient kakaoFeignClient;
 
     public KakaoRegisterResponseDto register(KakaoRegisterRequestDto request) {
@@ -46,11 +50,18 @@ public class AuthService {
         // 이미 회원가입 된 유저인지 확인
         validateNotAlreadySignIn(kakaoUserInfo.getId());
 
-        //아니라면 새로 유저 생성해줌
+        // 아니라면 새로 유저 생성해줌
         User user = createUserByKakaoUserInfo(kakaoUserInfo, request);
         User savedUser = userRepository.save(user);
 
+        // 빈 유저 리뷰 도큐먼트 생성
+        createEmptyUserReview(savedUser.getId());
         return KakaoRegisterResponseDto.of(savedUser.getId(), savedUser.getUsername());
+    }
+
+    private void createEmptyUserReview(Long userId) {
+        Review recommendation = Review.creatEmptyReview(userId);
+        reviewRepository.save(recommendation);
     }
 
     private KakaoGetUserInfoResponseDto getKakaoUserInfoByAccessToken(KakaoAccessToken kakaoAccessToken) {
