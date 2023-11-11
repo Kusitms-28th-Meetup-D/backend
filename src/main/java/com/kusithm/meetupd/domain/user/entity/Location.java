@@ -16,9 +16,20 @@ public class Location extends BaseEntity {
     private Long id;
 
     @Column(name = "location", nullable = false)
-    private Integer locationName;
+    private Integer locationType;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public static Location craeteLocation(Integer locationType) {
+        return Location.builder()
+                .locationType(locationType)
+                .build();
+    }
+
+    public void changeUser(User user) {
+        this.user = user;
+        user.updateLocation(this);
+    }
 }

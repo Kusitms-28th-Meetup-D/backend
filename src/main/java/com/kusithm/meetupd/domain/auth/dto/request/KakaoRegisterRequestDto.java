@@ -9,6 +9,12 @@ public class KakaoRegisterRequestDto {
 
     private String username;
 
-    private Integer age;
+    private Integer location;
+
+    private String major;
+
+    private String task;
+
+    private String selfIntroduce;
 
 }
