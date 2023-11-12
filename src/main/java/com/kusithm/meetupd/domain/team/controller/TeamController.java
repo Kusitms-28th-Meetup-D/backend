@@ -53,4 +53,12 @@ public class TeamController {
 
         return null;
     }
+
+    //팀 오픈하기
+//    @PostMapping("/open")
+//    public ResponseEntity<SuccessResponse<>> openTeam(){
+//
+////        return SuccessResponse.of(SuccessCode.OK, response);
+//        return null;
+//    }
 }

@@ -77,7 +77,7 @@ public class AuthService {
         Token token = generateToken(findUser.getId());
         saveRefreshToken(findUser.getId(), token.getRefreshToken());
 
-        return KakaoLoginResponseDto.of(findUser.getId(), request.getRedirectUrl(), token.getRefreshToken(), token.getAccessToken() );
+        return KakaoLoginResponseDto.of(findUser, request.getRedirectUrl(), token.getRefreshToken(), token.getAccessToken() );
     }
 
     public ReissueResponseDto reissue(ReissueRequestDto request) throws JsonProcessingException {

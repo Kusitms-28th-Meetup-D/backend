@@ -1,5 +1,6 @@
 package com.kusithm.meetupd.domain.auth.dto.response;
 
+import com.kusithm.meetupd.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,12 +16,18 @@ public class KakaoLoginResponseDto {
 
     private String accessToken;
 
-    public static KakaoLoginResponseDto of(Long userId, String redirectUrl, String refreshToken, String accessToken) {
+    private String profileImage;
+
+    private String name;
+
+    public static KakaoLoginResponseDto of(User user, String redirectUrl, String refreshToken, String accessToken) {
         return KakaoLoginResponseDto.builder()
-                .userId(userId)
+                .userId(user.getId())
                 .redirectUrl(redirectUrl)
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
+                .profileImage(user.getProfileImage())
+                .name(user.getUsername())
                 .build();
     }
 }
