@@ -1,5 +1,6 @@
 package com.kusithm.meetupd.domain.review.controller;
 
+import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
@@ -30,9 +31,16 @@ public class ReviewController {
 
     // 회원 리뷰 작성 API
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@RequestBody UploadReviewRequestDto request) {
-        UploadReviewResponseDto response = reviewService.uploadReviews(request.getSendUserId(), request);
+    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@UserId Long userId, @RequestBody UploadReviewRequestDto request) {
+        UploadReviewResponseDto response = reviewService.uploadReviews(userId, request);
         return SuccessResponse.of(SuccessCode.CREATED, response);
+    }
+
+    // 유저가 이 팀에 리뷰를 작성했는지 체크하는 API
+    @GetMapping("/check-reviewed/{teamId}")
+    public ResponseEntity<SuccessResponse<GetIsUserReviewTeamResponseDto>> isUserReviewThisTeam(@UserId Long userId, @PathVariable Long teamId) {
+        GetIsUserReviewTeamResponseDto response = reviewService.isUserReviewThisTeam(userId, teamId);
+        return SuccessResponse.of(SuccessCode.OK, response);
     }
 
     // 비 회원이 리뷰를 작성한 유저인지 체크하는 API
@@ -49,11 +57,5 @@ public class ReviewController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
-    // 유저가 이 팀에 리뷰를 작성했는지 체크하는 API
-    @GetMapping("/check-reviewed")
-    public ResponseEntity<SuccessResponse<GetIsUserReviewTeamResponseDto>> isUserReviewThisTeam(@RequestParam Long userId, @RequestParam Long teamId) {
-        GetIsUserReviewTeamResponseDto response = reviewService.isUserReviewThisTeam(userId, teamId);
-        return SuccessResponse.of(SuccessCode.OK, response);
-    }
 
 }
