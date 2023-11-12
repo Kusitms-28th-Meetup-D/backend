@@ -9,7 +9,17 @@ public class KakaoGetUserInfoResponseDto {
     private KakaoAcountDto kakao_account;
 
     @Getter
-    public class KakaoAcountDto {
+    public static class KakaoAcountDto {
         private String email;
+
+        private KakaoProfileDto profile;
+
+    }
+
+    @Getter
+    public static class KakaoProfileDto {
+
+        private String profile_image_url;
+
     }
 }

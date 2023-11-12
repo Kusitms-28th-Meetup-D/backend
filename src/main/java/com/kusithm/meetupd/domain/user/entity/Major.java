@@ -21,4 +21,15 @@ public class Major extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public static Major createMajor(String major) {
+        return Major.builder()
+                .major(major)
+                .build();
+    }
+
+    public void changeUser(User user) {
+        this.user = user;
+        user.addMajor(this);
+    }
 }

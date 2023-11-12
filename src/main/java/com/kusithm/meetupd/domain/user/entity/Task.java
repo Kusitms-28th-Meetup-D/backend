@@ -21,4 +21,15 @@ public class Task extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public static Task createTask(String task) {
+        return Task.builder()
+                .task(task)
+                .build();
+    }
+
+    public void updateUser(User user) {
+        this.user = user;
+        user.addTask(this);
+    }
 }
