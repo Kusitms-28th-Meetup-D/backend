@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@Document("non_user_recommend")
+@Document(collection = "non_user_recommend")
 public class NonUserReview {
 
     @Id

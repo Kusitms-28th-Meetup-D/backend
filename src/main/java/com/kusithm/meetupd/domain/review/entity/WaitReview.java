@@ -1,7 +1,7 @@
 package com.kusithm.meetupd.domain.review.entity;
 
 
-import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
+import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto.UploadReviewDto;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectKeyword;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectTeamCulture;
@@ -43,7 +43,7 @@ public class WaitReview {
     @Field(name = "recommendation_comment")
     private String recommendationComment;
 
-    public static WaitReview of(UploadReviewDto uploadReviewDto) {
+    public static WaitReview createWaitReview(UploadReviewDto uploadReviewDto) {
         WaitReview waitReview = WaitReview.builder()
                 .userId(uploadReviewDto.getUserId())
                 .teamId(uploadReviewDto.getTeamId())
@@ -57,6 +57,23 @@ public class WaitReview {
                 .build();
         if(uploadReviewDto.getRecommendationComment() != null) {
             waitReview.addComment(uploadReviewDto.getRecommendationComment());
+        }
+        return waitReview;
+    }
+
+    public static WaitReview createWaitReviewByNonUserRequest(NonUserReviewRequestDto nonUserReviewRequestDto) {
+        WaitReview waitReview = WaitReview.builder()
+                .userId(nonUserReviewRequestDto.getUserId())
+                .selectedKeywords(
+                        nonUserReviewRequestDto.getSelectedKeywords().stream()
+                                .map(SelectKeyword::of)
+                                .collect(Collectors.toList())
+                )
+                .selectedTeamCultures(SelectTeamCulture.of(nonUserReviewRequestDto.getSelectedTeamCultures()))
+                .selectedWorkMethods(SelectWorkMethod.of(nonUserReviewRequestDto.getSelectedWorkMethods()))
+                .build();
+        if(nonUserReviewRequestDto.getRecommendationComment() != null) {
+            waitReview.addComment(nonUserReviewRequestDto.getRecommendationComment());
         }
         return waitReview;
     }

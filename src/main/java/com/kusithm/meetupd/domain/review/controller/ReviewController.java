@@ -2,6 +2,7 @@ package com.kusithm.meetupd.domain.review.controller;
 
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
@@ -31,6 +32,13 @@ public class ReviewController {
     @PostMapping("")
     public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@RequestBody UploadReviewRequestDto request) {
         UploadReviewResponseDto response = reviewService.uploadReviews(request.getSendUserId(), request);
+        return SuccessResponse.of(SuccessCode.CREATED, response);
+    }
+
+    // 비 회원이 리뷰를 작성한 유저인지 체크하는 API
+    @PostMapping("/non-user")
+    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> checkUserReviewedByNonUser(@RequestBody NonUserReviewRequestDto request) {
+        UploadReviewResponseDto response = reviewService.uploadNonUserReview(request);
         return SuccessResponse.of(SuccessCode.CREATED, response);
     }
 

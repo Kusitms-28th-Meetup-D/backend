@@ -1,13 +1,15 @@
 package com.kusithm.meetupd.domain.review.service;
 
+import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.review.aws.AWSFeignClient;
-import com.kusithm.meetupd.domain.review.aws.dto.request.SendEmailByAWSFeignRequestDto;
+import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
+import com.kusithm.meetupd.domain.review.entity.NonUserReview;
 import com.kusithm.meetupd.domain.review.entity.Review;
 import com.kusithm.meetupd.domain.review.entity.UserReviewedTeam;
 import com.kusithm.meetupd.domain.review.entity.WaitReview;
@@ -29,8 +31,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.kusithm.meetupd.common.error.ErrorCode.USER_NOT_FOUND;
-import static com.kusithm.meetupd.common.error.ErrorCode.USER_RECOMMENDATION_NOT_FOUND;
+import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.review.entity.WaitReview.createWaitReviewByNonUserRequest;
 import static com.kusithm.meetupd.domain.review.entity.inner.ReviewComment.createRecommendationComment;
 
 @RequiredArgsConstructor
@@ -72,6 +74,16 @@ public class ReviewService {
         return GetIsUserReviewTeamResponseDto.of(checkUserReviewThisTeam(userId, teamId));
     }
 
+    public UploadReviewResponseDto uploadNonUserReview(NonUserReviewRequestDto request) {
+        validateUserExist(request.getUserId());
+        validateUserAlreadyReviewedByNonUser(request.getUserId());
+        WaitReview waitReview = createWaitReviewByNonUserRequest(request);
+        uploadNonUserReview(waitReview);
+        saveNonUserReviewedState(request.getUserId());
+        return UploadReviewResponseDto.of("추천사 작성을 성공했어요!");
+    }
+
+
     public CheckUserReviewedByNonUserResponseDto checkUserReviewedByNonUser(Long userId) {
         validateUserExist(userId);
         return CheckUserReviewedByNonUserResponseDto.of(checkUserAlreadyReviewedByNonUser(userId));
@@ -88,7 +100,7 @@ public class ReviewService {
 
     private static List<WaitReview> makeWaitReviewListFromUploadRequest(UploadReviewRequestDto request) {
         return request.getUploadReviews().stream()
-                .map(WaitReview::of)
+                .map(WaitReview::createWaitReview)
                 .toList();
     }
 
@@ -147,6 +159,21 @@ public class ReviewService {
         mongoTemplate.updateMulti(query, update, Review.class);
     }
 
+    private void uploadNonUserReview(WaitReview waitReview) {
+        Query query = createFindByUserIdQuery(waitReview.getUserId());
+        Update update = new Update();
+
+        increaseChoiceCountInUpdate(waitReview.getSelectedKeywords(), update);
+        increaseTeamCultureCountInUpdate(waitReview.getSelectedTeamCultures(), update);
+        increaseWorkMethodCountInUpdate(waitReview.getSelectedWorkMethods(), update);
+
+        ReviewComment createComment = createRecommendationComment(waitReview.getTeamId(), "비회원 추천사", waitReview.getRecommendationComment());
+        addCommentInUpdate(update, createComment);
+
+        mongoTemplate.updateMulti(query, update, Review.class);
+    }
+
+
     private void deleteWaitReview(WaitReview waitReview) {
         mongoTemplate.remove(waitReview);
     }
@@ -194,5 +221,16 @@ public class ReviewService {
 
     private Boolean checkUserAlreadyReviewedByNonUser(Long userId) {
         return nonUserReviewRepository.existsByUserId(userId);
+    }
+
+    private void validateUserAlreadyReviewedByNonUser(Long userId) {
+        if(checkUserAlreadyReviewedByNonUser(userId)) {
+            throw new ConflictException(ALREADY_USER_REVIEWED_BY_NON_USER);
+        }
+    }
+
+    private void saveNonUserReviewedState(Long userId) {
+        NonUserReview nonUserReview = NonUserReview.createNonUserReview(userId);
+        nonUserReviewRepository.save(nonUserReview);
     }
 }
