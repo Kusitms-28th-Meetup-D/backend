@@ -2,6 +2,8 @@ package com.kusithm.meetupd.domain.team.service;
 
 import com.kusithm.meetupd.common.error.ApplicationException;
 import com.kusithm.meetupd.common.error.EnumNotFoundException;
+import com.kusithm.meetupd.domain.contest.entity.Contest;
+import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
@@ -35,6 +37,7 @@ import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBE
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final ContestRepository contestRepository;
 
     //진행상황에 맞는 팀 찾기
     public Page<Team> findTeamsCondition(PageDto dto, Integer teamProgress) {
@@ -68,17 +71,21 @@ public class TeamService {
     //모집중인 팀 찾기
     public TeamResponseDto findRecruitingTeams(Page<Team> allRecruitingTeams) {
         List<RecruitingTeamResponseDto> dto = new ArrayList<>();
-
         for (Team team : allRecruitingTeams.getContent()) {
             List<TeamUser> teamUsers = team.getTeamUsers();
+            Contest contest = findContest(team.getContestId());
 
             for (TeamUser teamuser : teamUsers) {
-                if (teamuser.getRole().equals(TEAM_LEADER.getCode()))
-                    dto.add(new RecruitingTeamResponseDto(team, teamuser.getUser()));
+                if (teamuser.getRole().equals(TEAM_LEADER.getCode())) {
+                    dto.add(new RecruitingTeamResponseDto(contest, team, teamuser.getUser()));
+                }
             }
         }
-
         return TeamResponseDto.ofCode(allRecruitingTeams, dto);
+    }
+
+    private Contest findContest(String contestId) {
+        return contestRepository.findContestById(new ObjectId(contestId));
     }
 
     public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
