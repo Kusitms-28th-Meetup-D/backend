@@ -1,6 +1,7 @@
 package com.kusithm.meetupd.domain.team.dto.response;
 
 import com.kusithm.meetupd.common.error.EnumNotFoundException;
+import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import com.kusithm.meetupd.domain.user.entity.User;
@@ -32,7 +33,11 @@ public class RecruitingTeamResponseDto {
 
     private String teamLeaderMessage;
 
-    public RecruitingTeamResponseDto(Team team, User user) {
+    public RecruitingTeamResponseDto(Contest contest, Team team, User user) {
+
+        this.contestId = contest.getId();
+
+        this.contesttitle =contest.getTitle();
 
         this.teamLeaderId = user.getId();
 
@@ -43,4 +48,5 @@ public class RecruitingTeamResponseDto {
         this.teamLeaderMessage = team.getLeaderMessage();
 
     }
+
 }
