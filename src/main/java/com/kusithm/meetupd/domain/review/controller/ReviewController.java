@@ -31,8 +31,8 @@ public class ReviewController {
 
     // 회원 리뷰 작성 API
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@RequestBody UploadReviewRequestDto request) {
-        UploadReviewResponseDto response = reviewService.uploadReviews(request.getSendUserId(), request);
+    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@UserId Long userId, @RequestBody UploadReviewRequestDto request) {
+        UploadReviewResponseDto response = reviewService.uploadReviews(userId, request);
         return SuccessResponse.of(SuccessCode.CREATED, response);
     }
 
