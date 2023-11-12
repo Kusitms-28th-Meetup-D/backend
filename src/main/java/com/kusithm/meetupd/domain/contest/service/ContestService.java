@@ -2,6 +2,7 @@ package com.kusithm.meetupd.domain.contest.service;
 
 
 import com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto;
+import com.kusithm.meetupd.domain.contest.dto.response.GetContestDetailInfoResponseDto;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.entity.ContestType;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
@@ -43,12 +44,16 @@ public class ContestService {
 
     public List<FindContestsResponseDto> findContestsBySearchText(String searchText) {
 
-        List<Contest> contests = getContestsBySearchTextInMongoDB(searchText);
+        List<Contest> contests = getContestsBySearchText(searchText);
 
         return createListOf(contests, LocalDate.now());
     }
 
-    private List<Contest> getContestsBySearchTextInMongoDB(String searchText) {
+    public GetContestDetailInfoResponseDto getContestDetailById(String contestId) {
+        Contest findContest = getContestById(contestId);
+        return GetContestDetailInfoResponseDto.of(findContest);
+    }
+    private List<Contest> getContestsBySearchText(String searchText) {
         MongoDatabase database = mongoClient.getDatabase("wanteam-db");
         MongoCollection<Document> collection = database.getCollection("contest");
         AggregateIterable<Document> result = collection.aggregate(Arrays.asList(
@@ -90,6 +95,10 @@ public class ContestService {
 
     private void validContestType(Integer contestType) {
         ContestType.ofCode(contestType);
+    }
+
+    private Contest getContestById(String contestId) {
+        return contestRepository.findContestById(new ObjectId(contestId));
     }
 
     private void findContestTitleByIdTest(String contestId) {

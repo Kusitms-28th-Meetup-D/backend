@@ -53,4 +53,7 @@ public class Contest {
 
     @Field(name = "contest_images")
     private List<String> contestImages = new ArrayList<>();   // 공모전 사진
+
+    @Field(name = "subject")
+    private String subject;
 }
