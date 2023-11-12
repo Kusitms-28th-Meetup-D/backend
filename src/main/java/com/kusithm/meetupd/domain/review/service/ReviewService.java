@@ -4,6 +4,7 @@ import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.review.aws.AWSFeignClient;
 import com.kusithm.meetupd.domain.review.aws.dto.request.SendEmailByAWSFeignRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
+import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
@@ -14,9 +15,11 @@ import com.kusithm.meetupd.domain.review.entity.inner.ReviewComment;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectKeyword;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectTeamCulture;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectWorkMethod;
+import com.kusithm.meetupd.domain.review.mongo.NonUserReviewRepository;
 import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
 import com.kusithm.meetupd.domain.review.mongo.WaitReviewRepository;
 import com.kusithm.meetupd.domain.review.mysql.UserReviewedTeamRepository;
+import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.kusithm.meetupd.common.error.ErrorCode.USER_NOT_FOUND;
 import static com.kusithm.meetupd.common.error.ErrorCode.USER_RECOMMENDATION_NOT_FOUND;
 import static com.kusithm.meetupd.domain.review.entity.inner.ReviewComment.createRecommendationComment;
 
@@ -36,6 +40,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final WaitReviewRepository waitReviewRepository;
     private final UserReviewedTeamRepository userReviewedTeamRepository;
+    private final NonUserReviewRepository nonUserReviewRepository;
+    private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
     private final AWSFeignClient awsFeignClient;
 
@@ -45,11 +51,13 @@ public class ReviewService {
     }
 
     public GetUserReviewResponseDto getUserReviewByUserId(Long userId) {
+        validateUserExist(userId);
         Review review = getReviewByUserId(userId);
         return GetUserReviewResponseDto.of(review);
     }
 
     public UploadReviewResponseDto uploadReviews(Long sendUserId, UploadReviewRequestDto request) {
+        validateUserExist(sendUserId);
         // TODO 개발 테스트 편의를 위해 이미 유저가 팀에 리뷰를 작성했는지 여부는 주석 처리 했습니다.
 //        if(checkUserReviewThisTeam(sendUserId, getTeamId(request)))
 //            throw new ConflictException(DUPLICATE_USER_REVIEW_TEAM);
@@ -60,7 +68,13 @@ public class ReviewService {
     }
 
     public GetIsUserReviewTeamResponseDto isUserReviewThisTeam(Long userId, Long teamId) {
+        validateUserExist(userId);
         return GetIsUserReviewTeamResponseDto.of(checkUserReviewThisTeam(userId, teamId));
+    }
+
+    public CheckUserReviewedByNonUserResponseDto checkUserReviewedByNonUser(Long userId) {
+        validateUserExist(userId);
+        return CheckUserReviewedByNonUserResponseDto.of(checkUserAlreadyReviewedByNonUser(userId));
     }
 
     private Long getTeamId(UploadReviewRequestDto request) {
@@ -171,4 +185,14 @@ public class ReviewService {
         update.push("essays", createComment);
     }
 
+
+    private void validateUserExist(Long userId) {
+        if(!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException(USER_NOT_FOUND);
+        }
+    }
+
+    private Boolean checkUserAlreadyReviewedByNonUser(Long userId) {
+        return nonUserReviewRepository.existsByUserId(userId);
+    }
 }

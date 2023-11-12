@@ -3,6 +3,7 @@ package com.kusithm.meetupd.domain.review.controller;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
+import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
@@ -31,9 +32,14 @@ public class ReviewController {
         return SuccessResponse.of(SuccessCode.CREATED, response);
     }
 
+    @GetMapping("/non-user/check/{userId}")
+    public ResponseEntity<SuccessResponse<CheckUserReviewedByNonUserResponseDto>> checkUserReviewedByNonUser(@PathVariable Long userId) {
+        CheckUserReviewedByNonUserResponseDto response = reviewService.checkUserReviewedByNonUser(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
     @GetMapping("/check-reviewed")
     public ResponseEntity<SuccessResponse<GetIsUserReviewTeamResponseDto>> isUserReviewThisTeam(@RequestParam Long userId, @RequestParam Long teamId) {
-
         GetIsUserReviewTeamResponseDto response = reviewService.isUserReviewThisTeam(userId, teamId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
