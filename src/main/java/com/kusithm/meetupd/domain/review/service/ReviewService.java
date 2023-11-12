@@ -1,12 +1,15 @@
 package com.kusithm.meetupd.domain.review.service;
 
+import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.review.aws.AWSFeignClient;
-import com.kusithm.meetupd.domain.review.aws.dto.request.SendEmailByAWSFeignRequestDto;
+import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
+import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
+import com.kusithm.meetupd.domain.review.entity.NonUserReview;
 import com.kusithm.meetupd.domain.review.entity.Review;
 import com.kusithm.meetupd.domain.review.entity.UserReviewedTeam;
 import com.kusithm.meetupd.domain.review.entity.WaitReview;
@@ -14,9 +17,11 @@ import com.kusithm.meetupd.domain.review.entity.inner.ReviewComment;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectKeyword;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectTeamCulture;
 import com.kusithm.meetupd.domain.review.entity.inner.SelectWorkMethod;
+import com.kusithm.meetupd.domain.review.mongo.NonUserReviewRepository;
 import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
 import com.kusithm.meetupd.domain.review.mongo.WaitReviewRepository;
 import com.kusithm.meetupd.domain.review.mysql.UserReviewedTeamRepository;
+import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,7 +31,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.kusithm.meetupd.common.error.ErrorCode.USER_RECOMMENDATION_NOT_FOUND;
+import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.review.entity.WaitReview.createWaitReviewByNonUserRequest;
 import static com.kusithm.meetupd.domain.review.entity.inner.ReviewComment.createRecommendationComment;
 
 @RequiredArgsConstructor
@@ -36,6 +42,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final WaitReviewRepository waitReviewRepository;
     private final UserReviewedTeamRepository userReviewedTeamRepository;
+    private final NonUserReviewRepository nonUserReviewRepository;
+    private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
     private final AWSFeignClient awsFeignClient;
 
@@ -45,11 +53,13 @@ public class ReviewService {
     }
 
     public GetUserReviewResponseDto getUserReviewByUserId(Long userId) {
+        validateUserExist(userId);
         Review review = getReviewByUserId(userId);
         return GetUserReviewResponseDto.of(review);
     }
 
     public UploadReviewResponseDto uploadReviews(Long sendUserId, UploadReviewRequestDto request) {
+        validateUserExist(sendUserId);
         // TODO 개발 테스트 편의를 위해 이미 유저가 팀에 리뷰를 작성했는지 여부는 주석 처리 했습니다.
 //        if(checkUserReviewThisTeam(sendUserId, getTeamId(request)))
 //            throw new ConflictException(DUPLICATE_USER_REVIEW_TEAM);
@@ -60,7 +70,23 @@ public class ReviewService {
     }
 
     public GetIsUserReviewTeamResponseDto isUserReviewThisTeam(Long userId, Long teamId) {
+        validateUserExist(userId);
         return GetIsUserReviewTeamResponseDto.of(checkUserReviewThisTeam(userId, teamId));
+    }
+
+    public UploadReviewResponseDto uploadNonUserReview(NonUserReviewRequestDto request) {
+        validateUserExist(request.getUserId());
+        validateUserAlreadyReviewedByNonUser(request.getUserId());
+        WaitReview waitReview = createWaitReviewByNonUserRequest(request);
+        uploadNonUserReview(waitReview);
+        saveNonUserReviewedState(request.getUserId());
+        return UploadReviewResponseDto.of("추천사 작성을 성공했어요!");
+    }
+
+
+    public CheckUserReviewedByNonUserResponseDto checkUserReviewedByNonUser(Long userId) {
+        validateUserExist(userId);
+        return CheckUserReviewedByNonUserResponseDto.of(checkUserAlreadyReviewedByNonUser(userId));
     }
 
     private Long getTeamId(UploadReviewRequestDto request) {
@@ -74,7 +100,7 @@ public class ReviewService {
 
     private static List<WaitReview> makeWaitReviewListFromUploadRequest(UploadReviewRequestDto request) {
         return request.getUploadReviews().stream()
-                .map(WaitReview::of)
+                .map(WaitReview::createWaitReview)
                 .toList();
     }
 
@@ -133,6 +159,21 @@ public class ReviewService {
         mongoTemplate.updateMulti(query, update, Review.class);
     }
 
+    private void uploadNonUserReview(WaitReview waitReview) {
+        Query query = createFindByUserIdQuery(waitReview.getUserId());
+        Update update = new Update();
+
+        increaseChoiceCountInUpdate(waitReview.getSelectedKeywords(), update);
+        increaseTeamCultureCountInUpdate(waitReview.getSelectedTeamCultures(), update);
+        increaseWorkMethodCountInUpdate(waitReview.getSelectedWorkMethods(), update);
+
+        ReviewComment createComment = createRecommendationComment(waitReview.getTeamId(), "비회원 추천사", waitReview.getRecommendationComment());
+        addCommentInUpdate(update, createComment);
+
+        mongoTemplate.updateMulti(query, update, Review.class);
+    }
+
+
     private void deleteWaitReview(WaitReview waitReview) {
         mongoTemplate.remove(waitReview);
     }
@@ -171,4 +212,25 @@ public class ReviewService {
         update.push("essays", createComment);
     }
 
+
+    private void validateUserExist(Long userId) {
+        if(!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException(USER_NOT_FOUND);
+        }
+    }
+
+    private Boolean checkUserAlreadyReviewedByNonUser(Long userId) {
+        return nonUserReviewRepository.existsByUserId(userId);
+    }
+
+    private void validateUserAlreadyReviewedByNonUser(Long userId) {
+        if(checkUserAlreadyReviewedByNonUser(userId)) {
+            throw new ConflictException(ALREADY_USER_REVIEWED_BY_NON_USER);
+        }
+    }
+
+    private void saveNonUserReviewedState(Long userId) {
+        NonUserReview nonUserReview = NonUserReview.createNonUserReview(userId);
+        nonUserReviewRepository.save(nonUserReview);
+    }
 }

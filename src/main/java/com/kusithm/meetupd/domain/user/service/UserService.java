@@ -1,5 +1,6 @@
 package com.kusithm.meetupd.domain.user.service;
 
+import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
@@ -83,7 +84,7 @@ public class UserService {
 
     private void validateUserNotSpendTicketToTargetUser(Long userId, Long targetUserId) {
         if(userTicketSpendRepository.existsByUserIdAndPurchaseUserId(userId, targetUserId)) {
-            throw new ForbiddenException(ALREADY_USER_USE_TICKET);
+            throw new ConflictException(ALREADY_USER_USE_TICKET);
         }
     }
 
