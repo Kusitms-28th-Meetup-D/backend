@@ -30,23 +30,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // TODO api 추가될 때 white list url 확인해서 추가하기.
     private static final List<RequestMatcher> whiteUrlMatchers = Arrays.asList(
-            new AntPathRequestMatcher("/api/health"),
+
+            // 보안 관련 URI
             new AntPathRequestMatcher("/api/auth/register"),
             new AntPathRequestMatcher("/api/auth/login"),
             new AntPathRequestMatcher("/api/auth/reissue"),
-            new AntPathRequestMatcher("/"),
-            new AntPathRequestMatcher("/api/s3/upload"),
+
+            // 유저 관련 URI
+            new AntPathRequestMatcher("/api/users/myPage"),
+
+            // 팀 관련 URI
+            new AntPathRequestMatcher(("/api/teams/recruiting")),
+
+            // 공모전 관련 URI
             new AntPathRequestMatcher("/api/contests/search"),
             new AntPathRequestMatcher("/api/contests/categories"),
             new AntPathRequestMatcher("/api/contests/detail"),
-            new AntPathRequestMatcher("/swagger-ui/**"),
-            new AntPathRequestMatcher("/v3/api-docs/**"),
-            new AntPathRequestMatcher("/api/users/myPage"),
-            new AntPathRequestMatcher("/v3/api-docs/**"),
+
+            // 추천사 관련 URI
             new AntPathRequestMatcher("/api/reviews"),
             new AntPathRequestMatcher("/api/reviews/check-reviewed"),
             new AntPathRequestMatcher(("/api/reviews/info/*")),
-            new AntPathRequestMatcher(("/api/teams/recruiting"))
+
+            // 기타 URI
+            new AntPathRequestMatcher("/"),
+            new AntPathRequestMatcher("/api/health"),
+            new AntPathRequestMatcher("/api/s3/upload"),
+            new AntPathRequestMatcher("/v3/api-docs/**"),
+            new AntPathRequestMatcher("/v3/api-docs/**"),
+            new AntPathRequestMatcher("/swagger-ui/**")
     );
 
     @Override
