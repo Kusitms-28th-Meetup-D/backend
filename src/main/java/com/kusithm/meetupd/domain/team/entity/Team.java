@@ -42,5 +42,7 @@ public class Team extends BaseEntity {
     @OneToMany(mappedBy = "team",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<TeamUser> teamUsers = new ArrayList<>();
 
+    @Column(name = "contest_id")
+    private String contestId;
 
 }
