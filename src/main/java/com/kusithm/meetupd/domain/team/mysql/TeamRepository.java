@@ -10,4 +10,5 @@ import java.util.List;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findAllByProgress(int teamProgress);
     Page<Team> findAllByProgress(int teamProgress, Pageable pageable);
+    List<Team> findAllByContestIdAndProgress(String contestId, Integer teamProgress);
 }

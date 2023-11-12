@@ -37,12 +37,12 @@ public class TeamController {
     }
 
     //해당 공모전에서 모집중인 팀 리스트
-    @GetMapping("/{contestId}")
-    public ResponseEntity<SuccessResponse<List<RecruitingContestTeamResponseDto>>> findRecruitingTeams(@PathVariable String contestId) {
+    @GetMapping("/contest/{contestId}")
+    public ResponseEntity<SuccessResponse<List<RecruitingContestTeamResponseDto>>> findContestRecruitingTeams(@PathVariable String contestId) {
 
+        List<RecruitingContestTeamResponseDto> response = teamService.findContestRecruitingTeams(contestId, RECRUITING.getNumber());
 
-
-        return null;
+        return SuccessResponse.of(SuccessCode.OK, response);
     }
 
     //팀 상세조회
