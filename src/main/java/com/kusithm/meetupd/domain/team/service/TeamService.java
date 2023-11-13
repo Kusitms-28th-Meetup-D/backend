@@ -1,14 +1,12 @@
 package com.kusithm.meetupd.domain.team.service;
 
-import com.kusithm.meetupd.common.error.ApplicationException;
-import com.kusithm.meetupd.common.error.EnumNotFoundException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
+import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
-import com.kusithm.meetupd.domain.team.entity.TeamUserRoleType;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
 import com.kusithm.meetupd.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.kusithm.meetupd.common.error.ErrorCode.ENUM_NOT_FOUND;
-import static com.kusithm.meetupd.common.error.ErrorCode.USER_NOT_FOUND;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
 
@@ -97,5 +92,9 @@ public class TeamService {
     public void findTeamDetail(long teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
 
+    }
+
+    public void save(Long userId, RequestCreateTeamDto teamDto) {
+        teamRepository.save(teamDto.toEntity());
     }
 }
