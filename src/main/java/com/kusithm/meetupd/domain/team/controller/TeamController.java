@@ -60,8 +60,7 @@ public class TeamController {
     //팀 오픈하기
     @PostMapping("/open")
     public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@UserId Long userId, @RequestBody RequestCreateTeamDto teamDto){
-
-        teamService.save(userId,teamDto);
+        teamService.openTeam(userId,teamDto);
 
 //        return SuccessResponse.of(SuccessCode.OK, response);
         return null;
