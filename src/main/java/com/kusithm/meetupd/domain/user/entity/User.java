@@ -7,7 +7,9 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.kusithm.meetupd.domain.user.entity.Internship.createInternship;
 import static com.kusithm.meetupd.domain.user.entity.Location.craeteLocation;
 import static com.kusithm.meetupd.domain.user.entity.Major.createMajor;
 import static com.kusithm.meetupd.domain.user.entity.Task.createTask;
@@ -40,30 +42,30 @@ public class User extends BaseEntity {
     @Column(name="self_introduction",nullable = false)
     private String selfIntroduction;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Major> majors = new ArrayList<>(); // 전공
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Location location;  // 지역
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Task> tasks = new ArrayList<>();   //희망 직무
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Internship> internships = new ArrayList<>();   // 인턴쉽
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Award> awards = new ArrayList<>(); // 수상내역
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Tool> tools = new ArrayList<>();   // 사용 툴
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Certificate> certificates = new ArrayList<>(); // 자격증
 
@@ -98,12 +100,38 @@ public class User extends BaseEntity {
         createdMajor.changeUser(user);
 
         Task createdTask = createTask(task);
-        createdTask.updateUser(user);
+        createdTask.changeUser(user);
 
         Ticket ticket = createInitTicket();
         ticket.changeUser(user);
 
         return user;
+    }
+
+    public void updateUserProfile(List<String> internships,
+                                  List<String> awards,
+                                  List<String> tools,
+                                  List<String> certificates) {
+        this.internships.clear();
+        this.awards.clear();
+        this.tools.clear();
+        this.certificates.clear();
+
+        List<Internship> createInternships = internships.stream()
+                .map(Internship::createInternship).toList();
+        createInternships.forEach(internship -> internship.changeUser(this));
+
+        List<Award> createAwards = awards.stream()
+                .map(Award::createAward).toList();
+        createAwards.forEach(award -> award.changeUser(this));
+
+        List<Tool> createTools = tools.stream()
+                .map(Tool::createTool).toList();
+        createTools.forEach(tool -> tool.changeUser(this));
+
+        List<Certificate> createCertificates = certificates.stream()
+                .map(Certificate::createCertificate).toList();
+        createCertificates.forEach(certificate -> certificate.changeUser(this));
     }
 
     public void updateLocation(Location location) {
@@ -124,5 +152,23 @@ public class User extends BaseEntity {
 
     public Integer getTicketCount() {
         return this.ticket.getCount();
+    }
+
+    ///
+
+    public void addInternship(Internship internship) {
+        this.internships.add(internship);
+    }
+
+    public void addAward(Award award) {
+        this.awards.add(award);
+    }
+
+    public void addTool(Tool tool) {
+        this.tools.add(tool);
+    }
+
+    public void addCertificate(Certificate certificate) {
+        this.certificates.add(certificate);
     }
 }
