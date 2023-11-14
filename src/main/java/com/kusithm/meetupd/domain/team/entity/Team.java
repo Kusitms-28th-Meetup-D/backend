@@ -52,4 +52,7 @@ public class Team extends BaseEntity {
     @Column(name = "contest_id")
     private String contestId;
 
+    public void updateLocation(Location location) {
+        this.location = location;
+    }
 }
