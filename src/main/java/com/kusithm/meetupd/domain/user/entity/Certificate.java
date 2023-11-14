@@ -21,4 +21,15 @@ public class Certificate extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public static Certificate createCertificate(String certificate) {
+        return Certificate.builder()
+                .certificate(certificate)
+                .build();
+    }
+
+    public void changeUser(User user) {
+        this.user = user;
+        user.addCertificate(this);
+    }
 }

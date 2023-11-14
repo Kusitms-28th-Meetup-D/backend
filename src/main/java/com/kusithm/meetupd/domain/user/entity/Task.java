@@ -28,7 +28,7 @@ public class Task extends BaseEntity {
                 .build();
     }
 
-    public void updateUser(User user) {
+    public void changeUser(User user) {
         this.user = user;
         user.addTask(this);
     }
