@@ -5,6 +5,7 @@ import com.kusithm.meetupd.domain.contest.entity.ContestType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
@@ -23,6 +24,8 @@ public class GetContestDetailInfoResponseDto {
 
     private List<String> images;
 
+    private Long remainDay;
+
     private String description;
 
     private String recruitDate;
@@ -37,7 +40,7 @@ public class GetContestDetailInfoResponseDto {
 
     private String price;
 
-    public static GetContestDetailInfoResponseDto of(Contest contest) {
+    public static GetContestDetailInfoResponseDto of(Contest contest, LocalDate nowDate) {
         String recruitDate = "[접수기간]" + contest.getRecruitmentStartDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
                 + "(" + contest.getRecruitmentStartDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN) + ") ~ "
                 + contest.getRecruitmentEndDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
@@ -47,6 +50,7 @@ public class GetContestDetailInfoResponseDto {
                 .contestId(contest.getId())
                 .title(contest.getTitle())
                 .images(contest.getContestImages())
+                .remainDay(DAYS.between(nowDate, contest.getRecruitmentEndDate()))
                 .description(contest.getDesc())
                 .recruitDate(recruitDate)
                 .types(contest.getTypes().stream()

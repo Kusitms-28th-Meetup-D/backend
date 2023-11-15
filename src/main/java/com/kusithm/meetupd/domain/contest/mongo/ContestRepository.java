@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ContestRepository extends MongoRepository<Contest, String> {
 
@@ -18,5 +19,5 @@ public interface ContestRepository extends MongoRepository<Contest, String> {
     List<Contest> findContestsByDateAndType(LocalDate date, Integer num);
 
     @Query(value = "{_id : {$eq : ?0}}")
-    Contest findContestById(ObjectId contestId);
+    Optional<Contest> findContestById(ObjectId contestId);
 }
