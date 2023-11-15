@@ -122,8 +122,8 @@ public class TeamService {
     }
 
     @Transactional
-    public void changeRole(RequestChangeRoleDto requestChangeRoleDto) {
-        TeamUser teamUser = findTeamUser(requestChangeRoleDto.getUserId());
+    public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) {
+        TeamUser teamUser = findTeamUser(userId);
         teamUser.setRole(requestChangeRoleDto.getRole());
     }
 
