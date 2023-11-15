@@ -33,14 +33,14 @@ public class ContestService {
     private final MongoConverter mongoConverter;
     private final MongoClient mongoClient;
 
-    public List<FindContestsResponseDto> findContestsByCategory(LocalDate nowDate, Integer contestType) {
+    public List<FindContestsResponseDto> findContestsByCategory(Integer contestType) {
         // 카테고리 전체 조회일 때
         if(isFindAllContest(contestType)) {
-            return findAllContests(nowDate);
+            return findAllContests(LocalDate.now());
         }
         else {
             validContestType(contestType);
-            return findContestsByType(nowDate, contestType);
+            return findContestsByType(LocalDate.now(), contestType);
         }
     }
 
