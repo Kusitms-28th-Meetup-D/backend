@@ -102,7 +102,7 @@ public class TeamService {
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
-        verifyTeam(userId);
+        verifyCanOpenTeam(TEAM_LEADER.getCode(), userId);
         User user = findUserById(userId);
         Team team = saveTeam(teamDto);
         team.getLocation().changeUser(user);
@@ -110,45 +110,51 @@ public class TeamService {
         saveTeamUser(TEAM_LEADER.getCode(), user, team);
     }
 
-    public void applyTeam(Long userId, Long teamId) {
-        verifyTeamUser(userId);
-        User user = findUserById(userId);
-        Team team= findTeamById(teamId);
-        saveTeamUser(VOLUNTEER.getCode(),user,team);
-    }
-
-    @Transactional
-    public void changeRole(RequestChangeRoleDto requestChangeRoleDto) {
-        TeamUser teamUser = teamUserRepository.findByMemberId(requestChangeRoleDto.getTeamId()).orElseThrow(()-> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
-        teamUser.setRole(requestChangeRoleDto.getRole());
-
-    }
-
-    private Team findTeamById(Long teamId) {
-        return teamRepository.findById(teamId)
-                .orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
-    }
-
-
-    public User findUserById(Long userId) {
-        return userRepository.findById(userId).get();
-    }
-
-    public Team saveTeam(RequestCreateTeamDto teamDto) {
-        return teamRepository.save(teamDto.toEntity());
-    }
-
-    private TeamUser saveTeamUser(Integer role, User user, Team team) {
-        return teamUserRepository.save(TeamUser.toEntity(role, team, user));
-    }
-
-    private void verifyTeam(Long userId) {
-        if (teamUserRepository.existsById(userId))
+    private void verifyCanOpenTeam(Integer role, Long userId) {
+        if (teamUserRepository.existsByRoleAndUserId(role, userId))
             throw new ConflictException(ALREADY_USER_OPEN_TEAM);
-    }
 
-    private void verifyTeamUser(Long userId) {
-        if (teamUserRepository.existsByUserId(userId))
-            throw new ConflictException(ALREADY_USER_APPLY_TEAM);
+        public void applyTeam (Long userId, Long teamId){
+            verifyTeamUser(userId);
+            User user = findUserById(userId);
+            Team team = findTeamById(teamId);
+            saveTeamUser(VOLUNTEER.getCode(), user, team);
+        }
+
+        @Transactional
+        public void changeRole (RequestChangeRoleDto requestChangeRoleDto){
+            TeamUser teamUser = teamUserRepository.findByMemberId(requestChangeRoleDto.getTeamId()).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+            teamUser.setRole(requestChangeRoleDto.getRole());
+
+        }
+
+        private Team findTeamById (Long teamId){
+            return teamRepository.findById(teamId)
+                    .orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
+        }
+
+
+        public User findUserById (Long userId){
+            return userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        }
+
+        public Team saveTeam (RequestCreateTeamDto teamDto){
+            return teamRepository.save(teamDto.toEntity());
+        }
+
+        private TeamUser saveTeamUser (Integer role, User user, Team team){
+            return teamUserRepository.save(TeamUser.toEntity(role, team, user));
+        }
+
+        private void verifyTeam (Long userId){
+            if (teamUserRepository.existsById(userId))
+                throw new ConflictException(ALREADY_USER_OPEN_TEAM);
+        }
+
+        private void verifyTeamUser (Long userId){
+            if (teamUserRepository.existsByUserId(userId))
+                throw new ConflictException(ALREADY_USER_APPLY_TEAM);
+        }
     }
 }
