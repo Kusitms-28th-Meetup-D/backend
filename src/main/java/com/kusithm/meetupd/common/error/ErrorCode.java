@@ -52,6 +52,7 @@ public enum ErrorCode {
     DUPLICATE_USER_REVIEW_TEAM(HttpStatus.CONFLICT, "이미 회원님은 해당 팀에 리뷰를 남겼습니다."),
     ALREADY_USER_USE_TICKET(HttpStatus.CONFLICT, "이미 해당 유저에게 티켓을 사용했습니다."),
     ALREADY_USER_REVIEWED_BY_NON_USER(HttpStatus.CONFLICT, "이미 해당 유저는 다른 비회원에게 추천사를 작성 받았습니다."),
+    ALREADY_USER_OPEN_TEAM(HttpStatus.CONFLICT, "이미 해당 유저가 오픈한 팀이 있습니다."),
 
     /**
      *  500 INTERNAL SERVER ERROR

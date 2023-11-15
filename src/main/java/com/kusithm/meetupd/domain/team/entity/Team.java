@@ -4,6 +4,7 @@ package com.kusithm.meetupd.domain.team.entity;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.kusithm.meetupd.common.entity.BaseEntity;
 import com.kusithm.meetupd.domain.user.entity.GENDER;
+import com.kusithm.meetupd.domain.user.entity.Location;
 import com.kusithm.meetupd.domain.user.entity.Tool;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,10 +40,19 @@ public class Team extends BaseEntity {
     @Column(name = "progress", nullable = false)
     private Integer progress; //진행상황
 
+    @Column(name = "notice", nullable = false)
+    private String notice; //모집공고
+
+    @OneToOne(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Location location;  // 지역
+
     @OneToMany(mappedBy = "team",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<TeamUser> teamUsers = new ArrayList<>();
 
     @Column(name = "contest_id")
     private String contestId;
 
+    public void updateLocation(Location location) {
+        this.location = location;
+    }
 }
