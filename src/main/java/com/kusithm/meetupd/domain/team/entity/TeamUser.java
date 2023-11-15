@@ -4,15 +4,13 @@ import com.kusithm.meetupd.common.entity.BaseEntity;
 import com.kusithm.meetupd.domain.user.entity.Location;
 import com.kusithm.meetupd.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

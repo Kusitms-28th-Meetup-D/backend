@@ -5,6 +5,7 @@ import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
+import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
@@ -27,10 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.kusithm.meetupd.common.error.ErrorCode.ALREADY_USER_OPEN_TEAM;
-import static com.kusithm.meetupd.common.error.ErrorCode.USER_NOT_FOUND;
-import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
-import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
+import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -101,29 +100,55 @@ public class TeamService {
         Optional<Team> team = teamRepository.findById(teamId);
 
     }
+
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
         verifyTeam(userId);
         User user = findUserById(userId);
         Team team = saveTeam(teamDto);
         team.getLocation().changeUser(user);
         team.getLocation().changeTeam(team);
-        saveTeamUser(TEAM_LEADER.getCode(),user,team);
+        saveTeamUser(TEAM_LEADER.getCode(), user, team);
     }
 
-    private void verifyTeam(Long userId) {
-        if(teamUserRepository.existsById(userId))
-            throw new ConflictException(ALREADY_USER_OPEN_TEAM);
+    public void applyTeam(Long userId, Long teamId) {
+        verifyTeamUser(userId);
+        User user = findUserById(userId);
+        Team team= findTeamById(teamId);
+        saveTeamUser(VOLUNTEER.getCode(),user,team);
     }
 
-    public User findUserById(Long userId){
+    @Transactional
+    public void changeRole(RequestChangeRoleDto requestChangeRoleDto) {
+        TeamUser teamUser = teamUserRepository.findByMemberId(requestChangeRoleDto.getTeamId()).orElseThrow(()-> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+        teamUser.setRole(requestChangeRoleDto.getRole());
+
+    }
+
+    private Team findTeamById(Long teamId) {
+        return teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
+    }
+
+
+    public User findUserById(Long userId) {
         return userRepository.findById(userId).get();
     }
 
     public Team saveTeam(RequestCreateTeamDto teamDto) {
         return teamRepository.save(teamDto.toEntity());
     }
-    private TeamUser saveTeamUser(Integer role,User user, Team team) {
-        return teamUserRepository.save(TeamUser.toEntity(role,team,user));
+
+    private TeamUser saveTeamUser(Integer role, User user, Team team) {
+        return teamUserRepository.save(TeamUser.toEntity(role, team, user));
     }
 
+    private void verifyTeam(Long userId) {
+        if (teamUserRepository.existsById(userId))
+            throw new ConflictException(ALREADY_USER_OPEN_TEAM);
+    }
+
+    private void verifyTeamUser(Long userId) {
+        if (teamUserRepository.existsByUserId(userId))
+            throw new ConflictException(ALREADY_USER_APPLY_TEAM);
+    }
 }

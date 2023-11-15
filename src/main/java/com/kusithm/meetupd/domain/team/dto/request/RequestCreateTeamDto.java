@@ -15,6 +15,8 @@ import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING
 @Getter
 public class RequestCreateTeamDto {
 
+    public Long userId;
+
     public String contestId;
 
     public int headCount;
