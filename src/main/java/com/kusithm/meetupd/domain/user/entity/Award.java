@@ -22,4 +22,15 @@ public class Award extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public static Award createAward(String award) {
+        return Award.builder()
+                .awards(award)
+                .build();
+    }
+
+    public void changeUser(User user) {
+        this.user = user;
+        user.addAward(this);
+    }
 }
