@@ -1,12 +1,16 @@
 package com.kusithm.meetupd.domain.team.dto.response;
 
+import lombok.Builder;
+import lombok.Getter;
+
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Builder
 public class TeamDetailResponseDto {
 
     public ResponseTeamLeaderDto leaderInfo;
-
     public int expectedMember;//모집할 인원수
     public int joinMember;//합류한 인원수
     public String location;//활동지역
@@ -14,4 +18,8 @@ public class TeamDetailResponseDto {
     public String notice;//모집공고
     public int leftMember;//남은 자리수 : 모집할 인원수 - 모집된 인원수
     public List<ResponseTeamMemeberDto> teamMemeberInfos;
+
+//    public TeamDetailResponseDto of(){
+//
+//    }
 }

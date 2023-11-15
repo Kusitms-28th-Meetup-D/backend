@@ -90,14 +90,15 @@ public class TeamService {
         return contestRepository.findContestById(new ObjectId(contestId));
     }
 
-    public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
-        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
+    //팀 상세조회
+    public TeamDetailResponseDto findTeamDetail(Long teamId) {
+        Team team = findTeamById(teamId);
+        List<TeamUser> teamUserByRole = findTeamUserByRole(teamId);
+        return null;
     }
 
-
-    //팀 상세조회 - 기획팀 중단 요청
-    public void findTeamDetail(Long teamId) {
-        findTeamUser(teamId);
+    private List<TeamUser> findTeamUserByRole(Long teamId) {
+        return teamUserRepository.findAllByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId);
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
@@ -108,6 +109,12 @@ public class TeamService {
         team.getLocation().changeTeam(team);
         saveTeamUser(TEAM_LEADER.getCode(), user, team);
     }
+
+    public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
+        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
+    }
+
+
 
     private void verifyCanOpenTeam(Integer role, Long userId) {
         if (teamUserRepository.existsByRoleAndUserId(role, userId))
