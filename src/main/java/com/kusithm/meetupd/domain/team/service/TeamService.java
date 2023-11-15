@@ -89,24 +89,6 @@ public class TeamService {
         return TeamResponseDto.ofCode(allRecruitingTeams, dto);
     }
 
-    private Contest findContest(String contestId) {
-        return contestRepository.findContestById(new ObjectId(contestId))
-                .orElseThrow(() -> new EntityNotFoundException(CONTEST_NOT_FOUND));
-    }
-
-    //팀 상세조회
-    public TeamDetailResponseDto findTeamDetail(Long teamId) {
-        Team team = findTeamById(teamId);
-        List<TeamUser> teamUserByRole = findTeamUserByRole(teamId);
-        return null;
-    }
-
-
-    //팀 상세조회 - 기획팀 중단 요청
-    public void findTeamDetail(long teamId) {
-        Optional<Team> team = teamRepository.findById(teamId);
-    }
-
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
         verifyCanOpenTeam(TEAM_LEADER.getCode(), userId);
         User user = findUserById(userId);
@@ -116,29 +98,47 @@ public class TeamService {
         saveTeamUser(TEAM_LEADER.getCode(), user, team);
     }
 
-    public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
-        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
-    }
-
-    private void verifyCanOpenTeam(Integer role, Long userId) {
-        if (teamUserRepository.existsByRoleAndUserId(role, userId))
-            throw new ConflictException(ALREADY_USER_OPEN_TEAM);
-    }
     public void applyTeam(Long userId, Long teamId) {
-        verifyTeamUser(userId);
+        verifyAlreadyApplyThisTeam(userId, teamId);
         User user = findUserById(userId);
         Team team = findTeamById(teamId);
         saveTeamUser(VOLUNTEER.getCode(), user, team);
     }
 
+    //팀 상세조회 - 기획팀 중단 요청
+    public void findTeamDetail(Long teamId) {
+        findTeamUser(teamId);
+    }
+
     @Transactional
     public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) {
-        TeamUser teamUser = findTeamUser(userId);
+        TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, requestChangeRoleDto.getTeamId());
         teamUser.setRole(requestChangeRoleDto.getRole());
+    }
+
+    private Contest findContest(String contestId) {
+        return contestRepository.findContestById(new ObjectId(contestId))
+                .orElseThrow(() -> new EntityNotFoundException(CONTEST_NOT_FOUND));
     }
 
     private TeamUser findTeamUser(Long userId) {
         return teamUserRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+    }
+
+    public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
+        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
+    }
+
+    private List<TeamUser> findTeamUserByRole(Long teamId) {
+        return teamUserRepository.findAllByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId);
+    }
+
+    private TeamUser findTeamUserById(Long userId) {
+        return teamUserRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+    }
+
+    private TeamUser findTeamUserByUserIdAndTeamId(Long userId,Long teamId) {
+        return teamUserRepository.findByUserIdAndTeamId(userId,teamId).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
     }
 
     private Team findTeamById(Long teamId) {
@@ -159,8 +159,13 @@ public class TeamService {
         return teamUserRepository.save(TeamUser.toEntity(role, team, user));
     }
 
-    private void verifyTeamUser(Long userId) {
-        if (teamUserRepository.existsByUserId(userId))
+    private void verifyAlreadyApplyThisTeam(Long userId, Long teamId) {
+        if (teamUserRepository.existsByUserIdAndTeamId(userId, teamId))
             throw new ConflictException(ALREADY_USER_APPLY_TEAM);
+    }
+
+    private void verifyCanOpenTeam(Integer role, Long userId) {
+        if (teamUserRepository.existsByRoleAndUserId(role, userId))
+            throw new ConflictException(ALREADY_USER_OPEN_TEAM);
     }
 }
