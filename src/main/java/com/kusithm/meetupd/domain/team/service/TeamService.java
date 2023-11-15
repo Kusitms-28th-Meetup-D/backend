@@ -102,7 +102,7 @@ public class TeamService {
 
     }
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
-        verifyTeam(userId);
+        verifyCanOpenTeam(TEAM_LEADER.getCode(),userId);
         User user = findUserById(userId);
         Team team = saveTeam(teamDto);
         team.getLocation().changeUser(user);
@@ -110,13 +110,14 @@ public class TeamService {
         saveTeamUser(TEAM_LEADER.getCode(),user,team);
     }
 
-    private void verifyTeam(Long userId) {
-        if(teamUserRepository.existsById(userId))
+    private void verifyCanOpenTeam(Integer role, Long userId) {
+        if(teamUserRepository.existsByRoleAndUserId(role,userId))
             throw new ConflictException(ALREADY_USER_OPEN_TEAM);
     }
 
     public User findUserById(Long userId){
-        return userRepository.findById(userId).get();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
 
     public Team saveTeam(RequestCreateTeamDto teamDto) {
