@@ -6,6 +6,7 @@ import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
 import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
 import com.kusithm.meetupd.domain.user.dto.request.SpendUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.request.UserProfileUpdateRequestDto;
 import com.kusithm.meetupd.domain.user.dto.response.IsUserUseTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.SpendUserTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
@@ -26,6 +27,12 @@ public class UserController {
     public ResponseEntity<SuccessResponse<UserCheckResponseDto>> getUserName(@UserId Long userId) {
         UserCheckResponseDto response = userService.getUserByToken(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    @PostMapping("/profiles")
+    public ResponseEntity<SuccessResponse> updateUserProfile(@UserId Long userId, @RequestBody UserProfileUpdateRequestDto request) {
+        userService.updateUserProfile(userId, request);
+        return SuccessResponse.of(SuccessCode.OK);
     }
 
     @GetMapping("/myPage")

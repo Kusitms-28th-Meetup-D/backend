@@ -6,6 +6,7 @@ import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
 import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
 import com.kusithm.meetupd.domain.user.dto.request.SpendUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.request.UserProfileUpdateRequestDto;
 import com.kusithm.meetupd.domain.user.dto.response.IsUserUseTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.SpendUserTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
@@ -35,6 +36,15 @@ public class UserService {
                 .userId(findUser.getId())
                 .username(findUser.getUsername())
                 .build();
+    }
+
+    public void updateUserProfile(Long userId, UserProfileUpdateRequestDto request) {
+        User findUser = getUserByUserId(userId);
+        updateUserProfile(findUser, request);
+    }
+
+    private void updateUserProfile(User user, UserProfileUpdateRequestDto request) {
+        user.updateUserProfile(request.getInternships(), request.getAwards(), request.getTools(), request.getCertificates());
     }
 
     public UserMypageResponseDto getMypageUser(Long userId) {
