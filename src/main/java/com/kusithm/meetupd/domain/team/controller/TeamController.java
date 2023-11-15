@@ -65,22 +65,19 @@ public class TeamController {
         Long userId = teamDto.getUserId();
         teamService.openTeam(userId, teamDto);
 
-//        return SuccessResponse.of(SuccessCode.OK, response);
+//        return SuccessResponse.of(SuccessCode.TEAM_CREATED, response);
         return null;
     }
 
     //팀 합류 신청
     @PostMapping("/apply")
-//    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody Long TeamId) {
-        public ResponseEntity<SuccessResponse> applyTeam(@RequestBody TestDto testDto) {
-        Long userId = testDto.getUserId();
-        Long teamId = testDto.getTeamId();
+    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody Long teamId) {
         teamService.applyTeam(userId, teamId);
         return SuccessResponse.of(SuccessCode.OK);
     }
 
     //팀원 상태 변경(지원자 -> 합격 / 반려)
-    @PatchMapping("/changerole")
+    @PatchMapping("/change-role")
     public ResponseEntity<SuccessResponse> applyTeam(@RequestBody RequestChangeRoleDto requestChangeRoleDto) {
         teamService.changeRole(requestChangeRoleDto);
         return SuccessResponse.of(SuccessCode.OK);
