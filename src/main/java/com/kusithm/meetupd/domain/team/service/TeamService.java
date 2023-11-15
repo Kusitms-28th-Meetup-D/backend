@@ -1,16 +1,18 @@
 package com.kusithm.meetupd.domain.team.service;
 
-import com.kusithm.meetupd.common.error.ApplicationException;
-import com.kusithm.meetupd.common.error.EnumNotFoundException;
+import com.kusithm.meetupd.common.error.ConflictException;
+import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
+import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
-import com.kusithm.meetupd.domain.team.entity.TeamUserRoleType;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
+import com.kusithm.meetupd.domain.team.mysql.TeamUserRepository;
 import com.kusithm.meetupd.domain.user.entity.User;
+import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -24,9 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.kusithm.meetupd.common.error.ErrorCode.ENUM_NOT_FOUND;
+import static com.kusithm.meetupd.common.error.ErrorCode.ALREADY_USER_OPEN_TEAM;
 import static com.kusithm.meetupd.common.error.ErrorCode.USER_NOT_FOUND;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
@@ -37,6 +38,8 @@ import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBE
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamUserRepository teamUserRepository;
+    private final UserRepository userRepository;
     private final ContestRepository contestRepository;
 
     //진행상황에 맞는 팀 찾기
@@ -98,4 +101,30 @@ public class TeamService {
         Optional<Team> team = teamRepository.findById(teamId);
 
     }
+    public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
+        verifyCanOpenTeam(TEAM_LEADER.getCode(),userId);
+        User user = findUserById(userId);
+        Team team = saveTeam(teamDto);
+        team.getLocation().changeUser(user);
+        team.getLocation().changeTeam(team);
+        saveTeamUser(TEAM_LEADER.getCode(),user,team);
+    }
+
+    private void verifyCanOpenTeam(Integer role, Long userId) {
+        if(teamUserRepository.existsByRoleAndUserId(role,userId))
+            throw new ConflictException(ALREADY_USER_OPEN_TEAM);
+    }
+
+    public User findUserById(Long userId){
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+    }
+
+    public Team saveTeam(RequestCreateTeamDto teamDto) {
+        return teamRepository.save(teamDto.toEntity());
+    }
+    private TeamUser saveTeamUser(Integer role,User user, Team team) {
+        return teamUserRepository.save(TeamUser.toEntity(role,team,user));
+    }
+
 }

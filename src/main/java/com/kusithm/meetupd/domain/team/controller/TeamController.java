@@ -1,7 +1,9 @@
 package com.kusithm.meetupd.domain.team.controller;
 
+import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.response.TeamDetailResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.response.RecruitingContestTeamResponseDto;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,10 +58,11 @@ public class TeamController {
     }
 
     //팀 오픈하기
-//    @PostMapping("/open")
-//    public ResponseEntity<SuccessResponse<>> openTeam(){
-//
-////        return SuccessResponse.of(SuccessCode.OK, response);
-//        return null;
-//    }
+    @PostMapping("/open")
+    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@UserId Long userId, @RequestBody RequestCreateTeamDto teamDto){
+        teamService.openTeam(userId,teamDto);
+
+//        return SuccessResponse.of(SuccessCode.OK, response);
+        return null;
+    }
 }
