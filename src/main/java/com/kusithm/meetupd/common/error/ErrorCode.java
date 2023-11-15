@@ -41,6 +41,8 @@ public enum ErrorCode {
     CONTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 공모전을 찾을 수 없습니다."),
     USER_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 유저의 추천사를 찾을 수 없습니다."),
 
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신 팀을 찾을 수 없습니다."),
+    TEAM_USER_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신 팀원을 찾을 수 없습니다."),
 
 
     /**
@@ -53,6 +55,7 @@ public enum ErrorCode {
     ALREADY_USER_USE_TICKET(HttpStatus.CONFLICT, "이미 해당 유저에게 티켓을 사용했습니다."),
     ALREADY_USER_REVIEWED_BY_NON_USER(HttpStatus.CONFLICT, "이미 해당 유저는 다른 비회원에게 추천사를 작성 받았습니다."),
     ALREADY_USER_OPEN_TEAM(HttpStatus.CONFLICT, "이미 해당 유저가 오픈한 팀이 있습니다."),
+    ALREADY_USER_APPLY_TEAM(HttpStatus.CONFLICT, "이미 해당 팀에 지원한 유저입니다."),
 
     /**
      *  500 INTERNAL SERVER ERROR
