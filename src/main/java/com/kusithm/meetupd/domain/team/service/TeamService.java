@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
+import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
+import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +90,8 @@ public class TeamService {
     }
 
     private Contest findContest(String contestId) {
-        return contestRepository.findContestById(new ObjectId(contestId));
+        return contestRepository.findContestById(new ObjectId(contestId))
+                .orElseThrow(() -> new EntityNotFoundException(CONTEST_NOT_FOUND));
     }
 
     //팀 상세조회
@@ -97,8 +101,10 @@ public class TeamService {
         return null;
     }
 
-    private List<TeamUser> findTeamUserByRole(Long teamId) {
-        return teamUserRepository.findAllByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId);
+
+    //팀 상세조회 - 기획팀 중단 요청
+    public void findTeamDetail(long teamId) {
+        Optional<Team> team = teamRepository.findById(teamId);
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
@@ -114,13 +120,10 @@ public class TeamService {
         return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
     }
 
-
-
     private void verifyCanOpenTeam(Integer role, Long userId) {
         if (teamUserRepository.existsByRoleAndUserId(role, userId))
             throw new ConflictException(ALREADY_USER_OPEN_TEAM);
     }
-
     public void applyTeam(Long userId, Long teamId) {
         verifyTeamUser(userId);
         User user = findUserById(userId);
@@ -143,8 +146,7 @@ public class TeamService {
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
     }
 
-
-    public User findUserById(Long userId) {
+    public User findUserById(Long userId){
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
