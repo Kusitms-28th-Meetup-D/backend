@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Builder
 @Getter
 public class RecruitingContestTeamResponseDto {
-
+    private Long teamId;
     private int max;//모집할 인원수
     private int cur;//합류한 인원수
     private String leaderMessage;
@@ -25,6 +25,7 @@ public class RecruitingContestTeamResponseDto {
         int max = team.getHeadCount();
         int cur = team.getTeamUsers().size();
         return RecruitingContestTeamResponseDto.builder()
+                .teamId(team.getId())
                 .max(max)
                 .cur(team.getTeamUsers().size())
                 .leaderMessage(team.getLeaderMessage())
