@@ -51,18 +51,19 @@ public class TeamController {
     }
 
     //팀 상세조회
-    @GetMapping("/{teamId}")
-    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@PathVariable Long teamId) {
-        teamService.findTeamDetail(teamId);
-        return null;
+    @GetMapping("/detail/{teamId}")
+    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@UserId Long userId, @PathVariable Long teamId) {
+        TeamDetailResponseDto response = teamService.findTeamDetail(userId,teamId);
+        return SuccessResponse.of(SuccessCode.OK, response);
     }
 
     //팀 오픈하기
     @PostMapping("/open")
-    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@UserId Long userId, @RequestBody RequestCreateTeamDto teamDto){
-        teamService.openTeam(userId,teamDto);
+    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@RequestBody RequestCreateTeamDto teamDto) {
+        Long userId = teamDto.getUserId();
+        teamService.openTeam(userId, teamDto);
 
-//        return SuccessResponse.of(SuccessCode.OK, response);
+//        return SuccessResponse.of(SuccessCode.TEAM_CREATED, response);
         return null;
     }
 
