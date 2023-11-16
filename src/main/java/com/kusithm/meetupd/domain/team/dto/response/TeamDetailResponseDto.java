@@ -15,28 +15,30 @@ import java.util.stream.Collectors;
 public class TeamDetailResponseDto {
 
     public ResponseTeamMemeberDto leaderInfo;
-    private String teamLeaderMessage;
-    public int expectedMember;//모집할 인원수
-    public int joinMember;//합류한 인원수
+    private String leaderMessage;
+    public int max;//모집할 인원수
+    public int cur;//합류한 인원수
     public String location;//활동지역
     public String endDate;//활동 종료 예정일
     public String notice;//모집공고
     public int leftMember;//남은 자리수 : 모집할 인원수 - 모집된 인원수
     public List<ResponseTeamMemeberDto> teamMemeberInfos;
-    public String status; //나의 상태
+    public int status; //나의 상태
 
-    public static TeamDetailResponseDto of(Team team, User leader, List<User> teamMemeberInfos) {
-        int expectedMember = team.getHeadCount();
-        int joinMember = team.getTeamUsers().size();
+    public static TeamDetailResponseDto of(Team team, User leader, List<User> teamMemeberInfos,int status) {
+        int max = team.getHeadCount();
+        int cur = team.getTeamUsers().size();
         return TeamDetailResponseDto.builder()
                 .leaderInfo(new ResponseTeamMemeberDto(leader))
-                .teamLeaderMessage(team.getLeaderMessage())
-                .expectedMember(expectedMember)
-                .joinMember(joinMember)
+                .leaderMessage(team.getLeaderMessage())
+                .max(max)
+                .cur(cur)
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
                 .endDate(String.valueOf(team.getReviewDate()))
-                .leftMember(expectedMember-joinMember)
-                .teamMemeberInfos(teamMemeberInfos.stream().map(user -> new ResponseTeamMemeberDto(user)).collect(Collectors.toList()))
+                .notice(team.getNotice())
+                .leftMember(max-cur)
+                .teamMemeberInfos(teamMemeberInfos.stream().map(ResponseTeamMemeberDto::new).collect(Collectors.toList()))
+                .status(status)
                 .build();
     }
 }
