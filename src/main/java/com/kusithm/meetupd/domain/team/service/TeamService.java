@@ -93,12 +93,15 @@ public class TeamService {
     //팀 상세조회
     public TeamDetailResponseDto findTeamDetail(Long teamId) {
         Team team = findTeamById(teamId);
-        List<TeamUser> teamUserByRole = findTeamUserByRole(teamId);
-        return null;
+        List<TeamUser> teamUsers = findTeamUserByRole(TEAM_MEMBER.getCode(), teamId);
+        User teamLeader = findTeamUserByRole(TEAM_LEADER.getCode(), teamId).stream().map(teamUser -> teamUser.getUser()).findFirst().get();
+        List<User> teamMember = teamUsers.stream().map(TeamUser::getUser).collect(Collectors.toList());
+        return TeamDetailResponseDto.of(team,teamLeader,teamMember);
+//        return null;
     }
 
-    private List<TeamUser> findTeamUserByRole(Long teamId) {
-        return teamUserRepository.findAllByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId);
+    private List<TeamUser> findTeamUserByRole(Integer role,Long teamId) {
+        return teamUserRepository.findAllByRoleAndTeamId(role, teamId);
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {

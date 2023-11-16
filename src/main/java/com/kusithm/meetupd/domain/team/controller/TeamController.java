@@ -51,7 +51,7 @@ public class TeamController {
     }
 
     //팀 상세조회
-    @GetMapping("/{teamId}")
+    @GetMapping("/detail/{teamId}")
     public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@PathVariable Long teamId) {
         TeamDetailResponseDto response = teamService.findTeamDetail(teamId);
         return SuccessResponse.of(SuccessCode.OK, response);
@@ -69,7 +69,7 @@ public class TeamController {
 
     //팀 합류 신청
     @PostMapping("/apply")
-    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody Long teamId) {
+    public ResponseEntity<SuccessResponse> applyTeam(@RequestBody Long teamId,@RequestBody Long userId) {
         teamService.applyTeam(userId, teamId);
         return SuccessResponse.of(SuccessCode.OK);
     }
