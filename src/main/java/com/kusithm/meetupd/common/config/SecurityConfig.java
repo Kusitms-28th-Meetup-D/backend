@@ -24,6 +24,7 @@ public class SecurityConfig {
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final TokenProvider tokenProvider;
+    private final CorsConfig corsConfig;
 
     // white list 방식 JwtAuthFilter에서 함에 따라 주석처리
 //    private static final String[] WHITE_LIST_URL  = {"/api/health","/api/auth/register","/api/auth/login", "/api/auth/reissue", "/","/api/s3/upload"
@@ -43,6 +44,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .exceptionHandling(exceptionHandlingConfigurer ->
 //                        exceptionHandlingConfigurer.authenticationEntryPoint(customAuthenticationEntryPoint))
+                .addFilter(corsConfig.corsFilter())
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class)
                 .build();
