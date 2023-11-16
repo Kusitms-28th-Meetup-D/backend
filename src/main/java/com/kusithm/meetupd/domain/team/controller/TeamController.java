@@ -53,7 +53,7 @@ public class TeamController {
     //팀 상세조회
     @GetMapping("/detail/{teamId}")
     public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@UserId Long userId, @PathVariable Long teamId) {
-        TeamDetailResponseDto response = teamService.findTeamDetail(userId,teamId);
+        TeamDetailResponseDto response = teamService.findTeamDetail(userId, teamId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
@@ -77,7 +77,7 @@ public class TeamController {
     //팀원 상태 변경(지원자 -> 합격 / 반려)
     @PatchMapping("/change-role")
     public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody RequestChangeRoleDto requestChangeRoleDto) {
-        teamService.changeRole(userId,requestChangeRoleDto);
+        teamService.changeRole(userId, requestChangeRoleDto);
         return SuccessResponse.of(SuccessCode.OK);
     }
 }
