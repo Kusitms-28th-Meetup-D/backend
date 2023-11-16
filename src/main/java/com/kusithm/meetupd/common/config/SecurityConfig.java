@@ -42,10 +42,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement((sessionManagement) ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exceptionHandlingConfigurer ->
-                        exceptionHandlingConfigurer.authenticationEntryPoint(customAuthenticationEntryPoint))
-                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
-                        authorizationManagerRequestMatcherRegistry.anyRequest().authenticated())
+//                .exceptionHandling(exceptionHandlingConfigurer ->
+//                        exceptionHandlingConfigurer.authenticationEntryPoint(customAuthenticationEntryPoint))
+//                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
+//                        authorizationManagerRequestMatcherRegistry.anyRequest().authenticated())
                 .addFilter(corsConfig.corsFilter())
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class)
