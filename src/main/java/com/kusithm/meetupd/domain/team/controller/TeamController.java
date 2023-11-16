@@ -3,6 +3,8 @@ package com.kusithm.meetupd.domain.team.controller;
 import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.team.dto.TestDto;
+import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.response.TeamDetailResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
@@ -33,8 +35,8 @@ public class TeamController {
     @GetMapping("/recruiting")
     public ResponseEntity<SuccessResponse<TeamResponseDto>> findAllRecruitingTeams(PageDto pageDTO) {
 
-        Page<Team> teamsCondition = teamService.findTeamsCondition(pageDTO,RECRUITING.getNumber());
-        TeamResponseDto  response = teamService.findRecruitingTeams(teamsCondition);
+        Page<Team> teamsCondition = teamService.findTeamsCondition(pageDTO, RECRUITING.getNumber());
+        TeamResponseDto response = teamService.findRecruitingTeams(teamsCondition);
 
         return SuccessResponse.of(SuccessCode.OK, response);
     }
@@ -49,20 +51,33 @@ public class TeamController {
     }
 
     //팀 상세조회
-    @GetMapping("/{teamId}")
-    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@PathVariable Long teamId) {
-
-        teamService.findTeamDetail(teamId);
-
-        return null;
+    @GetMapping("/detail/{teamId}")
+    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@UserId Long userId, @PathVariable Long teamId) {
+        TeamDetailResponseDto response = teamService.findTeamDetail(userId,teamId);
+        return SuccessResponse.of(SuccessCode.OK, response);
     }
 
     //팀 오픈하기
     @PostMapping("/open")
-    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@UserId Long userId, @RequestBody RequestCreateTeamDto teamDto){
-        teamService.openTeam(userId,teamDto);
+    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@RequestBody RequestCreateTeamDto teamDto) {
+        Long userId = teamDto.getUserId();
+        teamService.openTeam(userId, teamDto);
 
-//        return SuccessResponse.of(SuccessCode.OK, response);
+//        return SuccessResponse.of(SuccessCode.TEAM_CREATED, response);
         return null;
+    }
+
+    //팀 합류 신청
+    @PostMapping("/apply")
+    public ResponseEntity<SuccessResponse> applyTeam(@RequestBody Long teamId,@RequestBody Long userId) {
+        teamService.applyTeam(userId, teamId);
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    //팀원 상태 변경(지원자 -> 합격 / 반려)
+    @PatchMapping("/change-role")
+    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody RequestChangeRoleDto requestChangeRoleDto) {
+        teamService.changeRole(userId, requestChangeRoleDto);
+        return SuccessResponse.of(SuccessCode.OK);
     }
 }
