@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
+import static org.springframework.util.ClassUtils.isPresent;
 
 @Service
 @RequiredArgsConstructor
@@ -91,17 +92,62 @@ public class TeamService {
     }
 
     //팀 상세조회
-    public TeamDetailResponseDto findTeamDetail(Long teamId) {
+    public TeamDetailResponseDto findTeamDetail(Long userId, Long teamId) {
         Team team = findTeamById(teamId);
-        List<TeamUser> teamUsers = findTeamUserByRole(TEAM_MEMBER.getCode(), teamId);
-        User teamLeader = findTeamUserByRole(TEAM_LEADER.getCode(), teamId).stream().map(teamUser -> teamUser.getUser()).findFirst().get();
-        List<User> teamMember = teamUsers.stream().map(TeamUser::getUser).collect(Collectors.toList());
-        return TeamDetailResponseDto.of(team,teamLeader,teamMember);
-//        return null;
+        User teamLeader = findTeamLeader(teamId);
+        List<User> teamMember = findTeamMember(teamId);
+        int status = decideStatus(userId, teamLeader.getId(), teamId);
+        return TeamDetailResponseDto.of(team, teamLeader, teamMember, status);
     }
 
-    private List<TeamUser> findTeamUserByRole(Integer role,Long teamId) {
+
+    private int decideStatus(Long userId, Long leaderId, Long teamId) {
+        if (validateIsUserLeader(userId, leaderId)) {
+            return 1;   //내가 오픈한 팀인 경우
+        }
+        Optional<TeamUser> teamUser = findTeamUserByUserIdAndTeamId(userId, teamId);
+        if (validateUserInTeam(teamUser)) {
+            return 2;   //내가 지원한 팀이 아닌경우
+        }
+        Integer userRole = getUserTeamRole(teamUser);
+        if (userRole.equals(TEAM_MEMBER.getCode())) {
+            return 3;   //승인
+        }
+        if (userRole.equals(FAILED.getCode())) {
+            return 4;   //반려
+        }
+        if (userRole.equals(VOLUNTEER.getCode())) {
+            return 5;   //승인,반려 둘 다 x
+        }
+        return 6;
+    }
+
+    private Boolean validateIsUserLeader(Long userId, Long leaderId) {
+        return userId.equals(leaderId);
+    }
+
+    private Boolean validateUserInTeam(Optional<TeamUser> teamUser) {
+        return teamUser.isEmpty();
+    }
+
+    private Integer getUserTeamRole(Optional<TeamUser> teamUser) {
+        return teamUser.get().getRole();
+    }
+
+    private List<User> findTeamMember(Long teamId) {
+        return findTeamUserByRole(TEAM_MEMBER.getCode(), teamId).stream().map(TeamUser::getUser).collect(Collectors.toList());
+    }
+
+    private User findTeamLeader(Long teamId) {
+        return findTeamUserByRole(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst().orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+    }
+
+    private List<TeamUser> findTeamUserByRole(Integer role, Long teamId) {
         return teamUserRepository.findAllByRoleAndTeamId(role, teamId);
+    }
+
+    private Optional<TeamUser> findTeamUserByUserIdAndTeamId(Long userId, Long teamId) {
+        return teamUserRepository.findByUserIdAndTeamId(userId, teamId);
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
@@ -118,7 +164,6 @@ public class TeamService {
     }
 
 
-
     private void verifyCanOpenTeam(Integer role, Long userId) {
         if (teamUserRepository.existsByRoleAndUserId(role, userId))
             throw new ConflictException(ALREADY_USER_OPEN_TEAM);
@@ -131,7 +176,6 @@ public class TeamService {
         saveTeamUser(VOLUNTEER.getCode(), user, team);
     }
 
-    @Transactional
     public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) {
         TeamUser teamUser = findTeamUser(userId);
         teamUser.setRole(requestChangeRoleDto.getRole());

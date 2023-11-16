@@ -52,8 +52,8 @@ public class TeamController {
 
     //팀 상세조회
     @GetMapping("/detail/{teamId}")
-    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@PathVariable Long teamId) {
-        TeamDetailResponseDto response = teamService.findTeamDetail(teamId);
+    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> findTeamDetail(@UserId Long userId, @PathVariable Long teamId) {
+        TeamDetailResponseDto response = teamService.findTeamDetail(userId,teamId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
