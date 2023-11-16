@@ -56,7 +56,7 @@ public enum ErrorCode {
     ALREADY_USER_REVIEWED_BY_NON_USER(HttpStatus.CONFLICT, "이미 해당 유저는 다른 비회원에게 추천사를 작성 받았습니다."),
     ALREADY_USER_OPEN_TEAM(HttpStatus.CONFLICT, "이미 해당 유저가 오픈한 팀이 있습니다."),
     ALREADY_USER_APPLY_TEAM(HttpStatus.CONFLICT, "이미 해당 팀에 지원한 유저입니다."),
-
+    USER_NOT_HAVE_AUTHORITY(HttpStatus.CONFLICT, "변경 권한이 없는 유저입니다."),
     /**
      *  500 INTERNAL SERVER ERROR
      */
