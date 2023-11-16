@@ -1,6 +1,8 @@
 package com.kusithm.meetupd.domain.contest.service;
 
 
+import com.kusithm.meetupd.common.error.EntityNotFoundException;
+import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto;
 import com.kusithm.meetupd.domain.contest.dto.response.GetContestDetailInfoResponseDto;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
@@ -31,36 +33,38 @@ public class ContestService {
     private final MongoConverter mongoConverter;
     private final MongoClient mongoClient;
 
-    public List<FindContestsResponseDto> findContestsByCategory(LocalDate nowDate, Integer contestType) {
+    public List<FindContestsResponseDto> findContestsByCategory(Integer contestType) {
         // 카테고리 전체 조회일 때
         if(isFindAllContest(contestType)) {
-            return findAllContests(nowDate);
+            return findAllContests(LocalDate.now());
         }
         else {
             validContestType(contestType);
-            return findContestsByType(nowDate, contestType);
+            return findContestsByType(LocalDate.now(), contestType);
         }
     }
 
     public List<FindContestsResponseDto> findContestsBySearchText(String searchText) {
-
         List<Contest> contests = getContestsBySearchText(searchText);
-
         return createListOf(contests, LocalDate.now());
     }
 
     public GetContestDetailInfoResponseDto getContestDetailById(String contestId) {
         Contest findContest = getContestById(contestId);
-        return GetContestDetailInfoResponseDto.of(findContest);
+        return GetContestDetailInfoResponseDto.of(findContest, LocalDate.now());
     }
     private List<Contest> getContestsBySearchText(String searchText) {
         MongoDatabase database = mongoClient.getDatabase("wanteam-db");
         MongoCollection<Document> collection = database.getCollection("contest");
+        return searchContestByText(searchText, collection);
+    }
+
+    private List<Contest> searchContestByText(String searchText, MongoCollection<Document> collection) {
         AggregateIterable<Document> result = collection.aggregate(Arrays.asList(
                 new Document("$search",
                         new Document("index", "wanteam-db-contest")
-                        .append("text", new Document("query", searchText)
-                                .append("path", new Document("wildcard", "*"))))));
+                                .append("text", new Document("query", searchText)
+                                        .append("path", new Document("wildcard", "*"))))));
 
         List<Contest> contests = new ArrayList<>();
         result.forEach(doc -> contests.add(mongoConverter.read(Contest.class, doc)));
@@ -74,7 +78,6 @@ public class ContestService {
 
     private List<FindContestsResponseDto> findContestsByType(LocalDate nowDate, Integer contestType) {
         List<Contest> findContests = findTypeContestsByDate(nowDate, contestType);
-
         return createListOf(findContests, nowDate);
     }
 
@@ -98,12 +101,8 @@ public class ContestService {
     }
 
     private Contest getContestById(String contestId) {
-        return contestRepository.findContestById(new ObjectId(contestId));
+        return contestRepository.findContestById(new ObjectId(contestId))
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CONTEST_NOT_FOUND));
     }
 
-    private void findContestTitleByIdTest(String contestId) {
-        // new ObjectId를 통해 String을 감싸서 보내줘야합니다.
-        Contest findContest = contestRepository.findContestById(new ObjectId(contestId));
-        findContest.getTitle();
-    }
 }

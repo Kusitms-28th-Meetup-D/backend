@@ -29,8 +29,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
+import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
-import static org.springframework.util.ClassUtils.isPresent;
 
 @Service
 @RequiredArgsConstructor
@@ -88,8 +89,14 @@ public class TeamService {
     }
 
     private Contest findContest(String contestId) {
-        return contestRepository.findContestById(new ObjectId(contestId));
+        return contestRepository.findContestById(new ObjectId(contestId))
+                .orElseThrow(() -> new EntityNotFoundException(CONTEST_NOT_FOUND));
     }
+
+    public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
+        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
+    }
+
 
     //팀 상세조회
     public TeamDetailResponseDto findTeamDetail(Long userId, Long teamId) {
@@ -158,11 +165,6 @@ public class TeamService {
         team.getLocation().changeTeam(team);
         saveTeamUser(TEAM_LEADER.getCode(), user, team);
     }
-
-    public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
-        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
-    }
-
 
     private void verifyCanOpenTeam(Integer role, Long userId) {
         if (teamUserRepository.existsByRoleAndUserId(role, userId))

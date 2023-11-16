@@ -23,10 +23,9 @@ public class ContestController {
 
     // 카테고리 공모전 조회 API
     @GetMapping("/categories")
-    public ResponseEntity<SuccessResponse<List<FindContestsResponseDto>>> findContests (@RequestParam(value = "searchStartDate", required = false, defaultValue = "20000101") @DateTimeFormat(pattern = "yyyyMMdd") LocalDate searchDate,
-                                                                                        @RequestParam(value = "contestType", required = false, defaultValue = "0") Integer contestType
+    public ResponseEntity<SuccessResponse<List<FindContestsResponseDto>>> findContests (@RequestParam(value = "contestType", required = false, defaultValue = "0") Integer contestType
     ) {
-        List<FindContestsResponseDto> response = contestService.findContestsByCategory(searchDate, contestType);
+        List<FindContestsResponseDto> response = contestService.findContestsByCategory(contestType);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
