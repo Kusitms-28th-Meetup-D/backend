@@ -4,6 +4,7 @@ import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
+import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
@@ -29,11 +30,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
+import static org.apache.logging.log4j.ThreadContext.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -64,9 +67,9 @@ public class TeamService {
         List<Team> teamByContentIdAndProgress = findTeamByContentIdAndProgress(contestId, teamProgress);
 
         for (Team teams : teamByContentIdAndProgress) {
-            User leader = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_LEADER.getCode())).map(teamUser -> teamUser.getUser()).findFirst().get();
+            User leader = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_LEADER.getCode())).map(TeamUser::getUser).findFirst().get();
 
-            List<User> member = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_MEMBER.getCode())).map(teamUser -> teamUser.getUser()).collect(Collectors.toList());
+            List<User> member = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_MEMBER.getCode())).map(TeamUser::getUser).collect(Collectors.toList());
 
             dto.add(RecruitingContestTeamResponseDto.of(teams, leader, member));
         }
@@ -138,18 +141,18 @@ public class TeamService {
     }
 
     private List<User> findTeamMember(Long teamId) {
-        return findTeamUserByRole(TEAM_MEMBER.getCode(), teamId).stream().map(TeamUser::getUser).collect(Collectors.toList());
+        return findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId).stream().map(TeamUser::getUser).collect(Collectors.toList());
     }
 
     private User findTeamLeader(Long teamId) {
-        return findTeamUserByRole(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst().orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        return findTeamUserByRoleAndTeamId(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst().orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
 
     public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
         return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
     }
 
-    private List<TeamUser> findTeamUserByRole(Integer role, Long teamId) {
+    private List<TeamUser> findTeamUserByRoleAndTeamId(Integer role, Long teamId) {
         return teamUserRepository.findAllByRoleAndTeamId(role, teamId);
     }
 
@@ -213,5 +216,18 @@ public class TeamService {
     private void verifyAlreadyApplyThisTeam(Long userId, Long teamId) {
         if (teamUserRepository.existsByUserIdAndTeamId(userId, teamId))
             throw new ConflictException(ALREADY_USER_APPLY_TEAM);
+    }
+
+    public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
+        List<Team> teamIOpened = findTeamByUserIdAndProgress(userId, RECRUITING.getNumber()); //내가 오픈한 팀 중 모집중인 팀을 찾아
+//        teamIOpened.stream().map(v -> (findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), v.getId())));
+//        teamIOpened.stream().map(v -> findContest(v.getContestId());
+//        List<TeamUser> teamMember = findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), 1L);
+//        List<TeamUser> applyMember = findTeamUserByRoleAndTeamId(VOLUNTEER.getCode(), 1L);
+        return null;
+    }
+
+    private List<Team> findTeamByUserIdAndProgress(Long userId, Integer progress) {
+        return teamRepository.findAllByIdAndProgress(userId, progress).orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
     }
 }
