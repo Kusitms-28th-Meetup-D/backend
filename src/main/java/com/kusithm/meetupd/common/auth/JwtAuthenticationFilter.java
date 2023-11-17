@@ -37,7 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             new AntPathRequestMatcher("/api/auth/reissue"),
 
             // 유저 관련 URI
-            new AntPathRequestMatcher("/api/users/myPage"),
 
             // 팀 관련 URI
             new AntPathRequestMatcher(("/api/teams/recruiting")),
