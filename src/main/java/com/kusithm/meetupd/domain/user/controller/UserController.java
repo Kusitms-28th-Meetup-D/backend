@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/myPage")
-    public ResponseEntity<SuccessResponse<UserMypageResponseDto>> getMypageUser(@RequestParam Long userId) {
+    public ResponseEntity<SuccessResponse<UserMypageResponseDto>> getMypageUser(@UserId Long userId) {
         UserMypageResponseDto response = userService.getMypageUser(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
