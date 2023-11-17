@@ -51,6 +51,12 @@ dependencies {
 
 	//S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// email auth
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.1.1'
+
+	// thymeleaf
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {
