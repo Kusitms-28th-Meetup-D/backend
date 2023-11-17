@@ -219,15 +219,37 @@ public class TeamService {
     }
 
     public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
-        List<Team> teamIOpened = findTeamByUserIdAndProgress(userId, RECRUITING.getNumber()); //내가 오픈한 팀 중 모집중인 팀을 찾아
-//        teamIOpened.stream().map(v -> (findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), v.getId())));
-//        teamIOpened.stream().map(v -> findContest(v.getContestId());
-//        List<TeamUser> teamMember = findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), 1L);
-//        List<TeamUser> applyMember = findTeamUserByRoleAndTeamId(VOLUNTEER.getCode(), 1L);
-        return null;
+        List<TeamIOpenedResponseDto> dtos = new ArrayList<>();
+        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, TEAM_LEADER.getCode()); //내가 오픈한 팀을 찾고
+        for (TeamUser teamUser : teamUsersIOpened) {
+            Team team = teamUser.getTeam();
+            if(compareTeamProgress(team,RECRUITING.getNumber())){
+                List<TeamUser> teamMember = findTeamUserByTeamIdAndRole(team.getId(), TEAM_MEMBER.getCode());
+                List<TeamUser> applyMember = findTeamUserByTeamIdAndRole(team.getId(), VOLUNTEER.getCode());
+                Contest contest = findContest(team.getContestId());
+                dtos.add(TeamIOpenedResponseDto.of(team.getId(), findUserThroughTeamUser(teamMember), findUserThroughTeamUser(applyMember), contest));
+            }
+        }
+        return dtos;
     }
 
-    private List<Team> findTeamByUserIdAndProgress(Long userId, Integer progress) {
-        return teamRepository.findAllByIdAndProgress(userId, progress).orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
+    private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId,Integer role) {
+        return teamUserRepository.findAllByTeamIdAndRole(teamId,role);
+    }
+
+    private boolean compareTeamProgress(Team team,Integer teamProgress) {
+        return team.getProgress().equals(teamProgress);
+    }
+
+    private List<Team> findTeamByProgress(Integer progress) {
+        return teamRepository.findAllByProgress(progress);
+    }
+
+    public List<User> findUserThroughTeamUser(List<TeamUser> teamUsers) {
+        return teamUsers.stream().map(v -> v.getUser()).collect(Collectors.toList());
+    }
+
+    private List<TeamUser> findTeamUserByUserIdAndRole(Long userId, Integer role) {
+        return teamUserRepository.findAllByUserIdAndRole(userId, role).orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
     }
 }

@@ -22,7 +22,7 @@ public class Team extends BaseEntity {
 
     @Id
     @Column(name = "team_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "head_count", nullable = false)

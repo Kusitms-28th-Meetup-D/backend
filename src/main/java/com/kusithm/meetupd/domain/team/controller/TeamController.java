@@ -60,11 +60,9 @@ public class TeamController {
 
     //팀 오픈하기
     @PostMapping("/open")
-    public ResponseEntity<SuccessResponse<TeamDetailResponseDto>> openTeam(@UserId Long userId, @RequestBody RequestCreateTeamDto teamDto) {
+    public ResponseEntity<SuccessResponse> openTeam(@UserId Long userId, @RequestBody RequestCreateTeamDto teamDto) {
         teamService.openTeam(userId, teamDto);
-
-//        return SuccessResponse.of(SuccessCode.TEAM_CREATED, response);
-        return null;
+        return SuccessResponse.of(SuccessCode.TEAM_CREATED);
     }
 
     //팀 합류 신청
@@ -84,7 +82,7 @@ public class TeamController {
     //내가 오픈한 팀
     @GetMapping("/opened-myself")
     public ResponseEntity<SuccessResponse<List<TeamIOpenedResponseDto>>> findTeamIOpen(@UserId Long userId) {
-        List<TeamIOpenedResponseDto> response= teamService.findTeamIOpen(userId);
+        List<TeamIOpenedResponseDto> response = teamService.findTeamIOpen(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 }
