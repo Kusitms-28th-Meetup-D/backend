@@ -220,7 +220,7 @@ public class TeamService {
 
     public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
         List<TeamIOpenedResponseDto> dtos = new ArrayList<>();
-        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, TEAM_LEADER.getCode()); //내가 오픈한 팀을 찾고
+        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, TEAM_LEADER.getCode());//내가 오픈한 팀을 찾고
         for (TeamUser teamUser : teamUsersIOpened) {
             Team team = teamUser.getTeam();
             if(compareTeamProgress(team,RECRUITING.getNumber())){
@@ -250,6 +250,6 @@ public class TeamService {
     }
 
     private List<TeamUser> findTeamUserByUserIdAndRole(Long userId, Integer role) {
-        return teamUserRepository.findAllByUserIdAndRole(userId, role).orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
+        return teamUserRepository.findAllByUserIdAndRole(userId, role);
     }
 }
