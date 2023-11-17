@@ -44,7 +44,6 @@ public enum ErrorCode {
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신 팀을 찾을 수 없습니다."),
     TEAM_USER_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신 팀원을 찾을 수 없습니다."),
 
-
     /**
      * 409 Conflict
      */
