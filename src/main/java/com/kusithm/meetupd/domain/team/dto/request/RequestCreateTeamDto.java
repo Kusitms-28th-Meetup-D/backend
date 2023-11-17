@@ -15,11 +15,9 @@ import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING
 @Getter
 public class RequestCreateTeamDto {
 
-    public Long userId;
-
     public String contestId;
 
-    public int headCount;
+    public int max;
 
     public Integer location;
 
@@ -33,7 +31,7 @@ public class RequestCreateTeamDto {
 
     public Team toEntity() {
         return Team.builder()
-                .headCount(headCount)
+                .headCount(max)
                 .location(Location.craeteLocation(location))
                 .reviewDate(endDate)
                 .chatLink(chatLink)
