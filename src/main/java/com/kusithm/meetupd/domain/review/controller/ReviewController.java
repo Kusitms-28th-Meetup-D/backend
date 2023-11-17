@@ -59,6 +59,4 @@ public class ReviewController {
         CheckUserReviewedByNonUserResponseDto response = reviewService.checkUserReviewedByNonUser(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
-
-
 }
