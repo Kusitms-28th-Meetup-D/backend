@@ -42,9 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 팀 관련 URI
             new AntPathRequestMatcher(("/api/teams/recruiting")),
             new AntPathRequestMatcher(("/api/teams/contest/*")),
-            new AntPathRequestMatcher(("/api/teams/open")),
-            new AntPathRequestMatcher(("/api/teams/apply")),
-            new AntPathRequestMatcher(("/api/teams/change-role")),
 
             // 공모전 관련 URI
             new AntPathRequestMatcher("/api/contests/search"),
