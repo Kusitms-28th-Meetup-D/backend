@@ -10,9 +10,12 @@ import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamRespons
 import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
 import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
 import com.kusithm.meetupd.domain.review.service.ReviewService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.UnsupportedEncodingException;
 
 
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public class ReviewController {
 
     // 회원 리뷰 작성 API
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@UserId Long userId, @RequestBody UploadReviewRequestDto request) {
+    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> uploadRecommendation(@UserId Long userId, @RequestBody UploadReviewRequestDto request) throws MessagingException, UnsupportedEncodingException {
         UploadReviewResponseDto response = reviewService.uploadReviews(userId, request);
         return SuccessResponse.of(SuccessCode.CREATED, response);
     }
@@ -43,9 +46,9 @@ public class ReviewController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
-    // 비 회원이 리뷰를 작성한 유저인지 체크하는 API
+    // 비 회원이 리뷰 작성
     @PostMapping("/non-user")
-    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> checkUserReviewedByNonUser(@RequestBody NonUserReviewRequestDto request) {
+    public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> checkUserReviewedByNonUser(@RequestBody NonUserReviewRequestDto request) throws MessagingException, UnsupportedEncodingException {
         UploadReviewResponseDto response = reviewService.uploadNonUserReview(request);
         return SuccessResponse.of(SuccessCode.CREATED, response);
     }

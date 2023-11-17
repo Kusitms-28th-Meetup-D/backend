@@ -2,7 +2,9 @@ package com.kusithm.meetupd.domain.review.service;
 
 import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
-import com.kusithm.meetupd.domain.review.aws.AWSFeignClient;
+import com.kusithm.meetupd.domain.contest.entity.Contest;
+import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
+import com.kusithm.meetupd.domain.email.service.EmailService;
 import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
@@ -21,15 +23,22 @@ import com.kusithm.meetupd.domain.review.mongo.NonUserReviewRepository;
 import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
 import com.kusithm.meetupd.domain.review.mongo.WaitReviewRepository;
 import com.kusithm.meetupd.domain.review.mysql.UserReviewedTeamRepository;
+import com.kusithm.meetupd.domain.team.entity.Team;
+import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
+import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.review.entity.WaitReview.createWaitReviewByNonUserRequest;
@@ -44,8 +53,10 @@ public class ReviewService {
     private final UserReviewedTeamRepository userReviewedTeamRepository;
     private final NonUserReviewRepository nonUserReviewRepository;
     private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
+    private final ContestRepository contestRepository;
     private final MongoTemplate mongoTemplate;
-    private final AWSFeignClient awsFeignClient;
+    private final EmailService emailService;
 
     public void createUserEmptyReview(Long userId){
         Review recommendation = Review.creatEmptyReview(userId);
@@ -58,13 +69,15 @@ public class ReviewService {
         return GetUserReviewResponseDto.of(review);
     }
 
-    public UploadReviewResponseDto uploadReviews(Long sendUserId, UploadReviewRequestDto request) {
+    public UploadReviewResponseDto uploadReviews(Long sendUserId, UploadReviewRequestDto request) throws MessagingException, UnsupportedEncodingException {
         validateUserExist(sendUserId);
         // TODO 개발 테스트 편의를 위해 이미 유저가 팀에 리뷰를 작성했는지 여부는 주석 처리 했습니다.
 //        if(checkUserReviewThisTeam(sendUserId, getTeamId(request)))
 //            throw new ConflictException(DUPLICATE_USER_REVIEW_TEAM);
         List<WaitReview> waitReviews = makeWaitReviewListFromUploadRequest(request);
-        waitReviews.forEach(this::uploadOrWaitReview);
+        for (WaitReview waitReview : waitReviews) {
+            uploadOrWaitReview(waitReview);
+        }
         String uploadResultString = updateSendUserReviews(sendUserId, getTeamId(request));
         return UploadReviewResponseDto.of(uploadResultString);
     }
@@ -74,11 +87,12 @@ public class ReviewService {
         return GetIsUserReviewTeamResponseDto.of(checkUserReviewThisTeam(userId, teamId));
     }
 
-    public UploadReviewResponseDto uploadNonUserReview(NonUserReviewRequestDto request) {
+    public UploadReviewResponseDto uploadNonUserReview(NonUserReviewRequestDto request) throws MessagingException, UnsupportedEncodingException {
         validateUserExist(request.getUserId());
         validateUserAlreadyReviewedByNonUser(request.getUserId());
         WaitReview waitReview = createWaitReviewByNonUserRequest(request);
         uploadNonUserReview(waitReview);
+        sendReviewUploadEmail(waitReview);
         saveNonUserReviewedState(request.getUserId());
         return UploadReviewResponseDto.of("추천사 작성을 성공했어요!");
     }
@@ -105,20 +119,27 @@ public class ReviewService {
     }
 
 
-    private void uploadOrWaitReview(WaitReview waitReview) {
+    private void uploadOrWaitReview(WaitReview waitReview) throws MessagingException, UnsupportedEncodingException {
         // 리뷰 받는 유저가 팀에 추천사를 남겼으면 바로 반영
         if(checkUserReviewThisTeam(waitReview.getUserId(), waitReview.getTeamId())) {
             uploadReview(waitReview);
         }
-        else {
-            // 아직 리뷰받는 유저가 팀에 추천사를 남기지 않았다면 대기 리뷰 document에 저장
+        else { // 아직 리뷰받는 유저가 팀에 추천사를 남기지 않았다면 대기 리뷰 document에 저장
             uploadWaitReview(waitReview);
         }
+        sendReviewUploadEmail(waitReview);
+    }
 
-        // TODO 이메일로 인증 ~~님이 회원님에게 추천사를 작성했어요 어서 확인해보세요! 보내야함.
-        // SendEmailByAWSFeignRequestDto.of(보낼 유저 이메일 , 팀 이름)
-//        SendEmailByAWSFeignRequestDto request = SendEmailByAWSFeignRequestDto.of("ojy09291@naver.com", "내팀팀팀");
-//        awsFeignClient.sendReviewEmail(request);
+    private void sendReviewUploadEmail(WaitReview waitReview) throws MessagingException, UnsupportedEncodingException {
+        User user = getUserRepositoryById(waitReview.getUserId());
+        Team team = getTeamById(waitReview.getTeamId());
+        Contest contest = getContestById(team.getContestId());
+        emailService.sendReceivedReviewEmail(user.getEmail(), contest.getTitle());
+    }
+
+    private User getUserRepositoryById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
 
     private String updateSendUserReviews(Long userId, Long teamId) {
@@ -145,31 +166,36 @@ public class ReviewService {
     private void uploadReview(WaitReview waitReview) {
         Query query = createFindByUserIdQuery(waitReview.getUserId());
         Update update = new Update();
-
         increaseChoiceCountInUpdate(waitReview.getSelectedKeywords(), update);
         increaseTeamCultureCountInUpdate(waitReview.getSelectedTeamCultures(), update);
         increaseWorkMethodCountInUpdate(waitReview.getSelectedWorkMethods(), update);
-
-        // TODO 팀 repository에서 teamId를 통해 공모전의 이름을 가져와서 여기서 넣어야할듯
         if(isReviewHaveComment(waitReview)) {
-            ReviewComment createComment = createRecommendationComment(waitReview.getTeamId(), "testContest", waitReview.getRecommendationComment());
+            Team team = getTeamById(waitReview.getTeamId());
+            Contest contest = getContestById(team.getContestId());
+            ReviewComment createComment = createRecommendationComment(waitReview.getTeamId(), contest.getTitle(), waitReview.getRecommendationComment());
             addCommentInUpdate(update, createComment);
         }
-
         mongoTemplate.updateMulti(query, update, Review.class);
+    }
+
+    private Contest getContestById(String contestId) {
+        return contestRepository.findContestById(new ObjectId(contestId))
+                .orElseThrow(() -> new EntityNotFoundException(CONTEST_NOT_FOUND));
+    }
+
+    private Team getTeamById(Long teamId) {
+        return teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
     }
 
     private void uploadNonUserReview(WaitReview waitReview) {
         Query query = createFindByUserIdQuery(waitReview.getUserId());
         Update update = new Update();
-
         increaseChoiceCountInUpdate(waitReview.getSelectedKeywords(), update);
         increaseTeamCultureCountInUpdate(waitReview.getSelectedTeamCultures(), update);
         increaseWorkMethodCountInUpdate(waitReview.getSelectedWorkMethods(), update);
-
         ReviewComment createComment = createRecommendationComment(waitReview.getTeamId(), "비회원 추천사", waitReview.getRecommendationComment());
         addCommentInUpdate(update, createComment);
-
         mongoTemplate.updateMulti(query, update, Review.class);
     }
 
