@@ -35,7 +35,7 @@ public class UserController {
         return SuccessResponse.of(SuccessCode.OK);
     }
 
-    @GetMapping("/mypage/{userId}")
+    @GetMapping("/profiles/{userId}")
     public ResponseEntity<SuccessResponse<UserMypageResponseDto>> getMypageUser(@PathVariable Long userId) {
         UserMypageResponseDto response = userService.getMypageUser(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
