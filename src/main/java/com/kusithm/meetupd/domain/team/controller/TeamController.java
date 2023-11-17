@@ -3,6 +3,7 @@ package com.kusithm.meetupd.domain.team.controller;
 import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.TestDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
@@ -78,5 +79,12 @@ public class TeamController {
     public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody RequestChangeRoleDto requestChangeRoleDto) {
         teamService.changeRole(userId, requestChangeRoleDto);
         return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    //내가 오픈한 팀
+    @GetMapping("/opened-myself")
+    public ResponseEntity<SuccessResponse<List<TeamIOpenedResponseDto>>> findTeamIOpen(@UserId Long userId) {
+        List<TeamIOpenedResponseDto> response= teamService.findTeamIOpen(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
     }
 }
