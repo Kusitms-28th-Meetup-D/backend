@@ -167,7 +167,6 @@ public class TeamService {
         verifyCanOpenTeam(TEAM_LEADER.getCode(), userId);
         User user = findUserById(userId);
         Team team = saveTeam(teamDto);
-        team.getLocation().changeUser(user);
         team.getLocation().changeTeam(team);
         Query query = createFindContestByIdQuery(team.getContestId());
         Update update = new Update();

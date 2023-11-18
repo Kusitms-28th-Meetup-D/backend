@@ -32,4 +32,8 @@ public class Major extends BaseEntity {
         this.user = user;
         user.addMajor(this);
     }
+
+    public void changeMajor(String major) {
+        this.major = major;
+    }
 }

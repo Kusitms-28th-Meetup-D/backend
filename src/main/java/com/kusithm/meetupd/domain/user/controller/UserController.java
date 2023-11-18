@@ -6,6 +6,7 @@ import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.user.dto.UserMypageResponseDto;
 import com.kusithm.meetupd.domain.user.dto.request.BuyUserTicketRequestDto;
 import com.kusithm.meetupd.domain.user.dto.request.SpendUserTicketRequestDto;
+import com.kusithm.meetupd.domain.user.dto.request.UpdateUserAccountInfoRequestDto;
 import com.kusithm.meetupd.domain.user.dto.request.UserProfileUpdateRequestDto;
 import com.kusithm.meetupd.domain.user.dto.response.IsUserUseTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.SpendUserTicketResponseDto;
@@ -39,6 +40,12 @@ public class UserController {
     public ResponseEntity<SuccessResponse<UserMypageResponseDto>> getMypageUser(@PathVariable Long userId) {
         UserMypageResponseDto response = userService.getMypageUser(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    @PatchMapping("/account-info")
+    public ResponseEntity<SuccessResponse> updateUserAccountInfo(@UserId Long userId, @RequestBody UpdateUserAccountInfoRequestDto request) {
+        userService.updateUserAccountInfo(userId, request);
+        return SuccessResponse.of(SuccessCode.OK);
     }
 
     @PatchMapping("/tickets/buy")
