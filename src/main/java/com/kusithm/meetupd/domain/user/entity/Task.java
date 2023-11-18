@@ -32,4 +32,8 @@ public class Task extends BaseEntity {
         this.user = user;
         user.addTask(this);
     }
+
+    public void changeTask(String task) {
+        this.task = task;
+    }
 }

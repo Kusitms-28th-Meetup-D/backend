@@ -1,7 +1,6 @@
 package com.kusithm.meetupd.domain.user.entity;
 
 import com.kusithm.meetupd.common.entity.BaseEntity;
-import com.kusithm.meetupd.domain.team.entity.Team;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity(name = "USER_LOCATION")
-public class Location extends BaseEntity {
+public class UserLocation extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "location_id")
@@ -23,20 +22,9 @@ public class Location extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
-    private Team team;
-
-    public static Location craeteLocation(Integer locationType) {
-        return Location.builder()
+    public static UserLocation createLocation(Integer locationType) {
+        return UserLocation.builder()
                 .locationType(locationType)
-                .build();
-    }
-
-    public static Location craeteLocation(Integer locationType,User user) {
-        return Location.builder()
-                .locationType(locationType)
-                .user(user)
                 .build();
     }
 
@@ -45,8 +33,8 @@ public class Location extends BaseEntity {
         user.updateLocation(this);
     }
 
-    public void changeTeam(Team team) {
-        this.team = team;
-        team.updateLocation(this);
+    public void changeLocationType(Integer locationType) {
+        this.locationType = locationType;
     }
+
 }

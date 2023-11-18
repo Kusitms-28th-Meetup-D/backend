@@ -1,11 +1,7 @@
 package com.kusithm.meetupd.domain.team.dto.request;
 
 import com.kusithm.meetupd.domain.team.entity.Team;
-import com.kusithm.meetupd.domain.team.entity.TeamProgressType;
-import com.kusithm.meetupd.domain.team.entity.TeamUser;
-import com.kusithm.meetupd.domain.user.entity.Location;
-import com.kusithm.meetupd.domain.user.entity.User;
-import lombok.Builder;
+import com.kusithm.meetupd.domain.team.entity.TeamLocation;
 import lombok.Getter;
 
 import java.util.Date;
@@ -32,7 +28,7 @@ public class RequestCreateTeamDto {
     public Team toEntity() {
         return Team.builder()
                 .headCount(max)
-                .location(Location.craeteLocation(location))
+                .location(TeamLocation.createLocation(location))
                 .reviewDate(endDate)
                 .chatLink(chatLink)
                 .leaderMessage(leaderMessage)

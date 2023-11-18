@@ -20,7 +20,6 @@ import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetIdResponseDto;
 import com.kusithm.meetupd.domain.auth.kakao.dto.KakaoGetUserInfoResponseDto;
 import com.kusithm.meetupd.domain.review.entity.Review;
 import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
-import com.kusithm.meetupd.domain.user.entity.Location;
 import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;

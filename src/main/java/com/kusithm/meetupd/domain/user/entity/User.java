@@ -7,10 +7,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.kusithm.meetupd.domain.user.entity.Internship.createInternship;
-import static com.kusithm.meetupd.domain.user.entity.Location.craeteLocation;
 import static com.kusithm.meetupd.domain.user.entity.Major.createMajor;
 import static com.kusithm.meetupd.domain.user.entity.Task.createTask;
 import static com.kusithm.meetupd.domain.user.entity.Ticket.*;
@@ -47,7 +44,7 @@ public class User extends BaseEntity {
     private List<Major> majors = new ArrayList<>(); // 전공
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Location location;  // 지역
+    private UserLocation location;  // 지역
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
@@ -93,19 +90,26 @@ public class User extends BaseEntity {
                 .profileImage(profileImage)
                 .build();
 
-        Location createdlocation = craeteLocation(location);
+        UserLocation createdlocation = UserLocation.createLocation(location);
         createdlocation.changeUser(user);
-
         Major createdMajor = createMajor(major);
         createdMajor.changeUser(user);
-
         Task createdTask = createTask(task);
         createdTask.changeUser(user);
-
         Ticket ticket = createInitTicket();
         ticket.changeUser(user);
-
         return user;
+    }
+    public void updateUserProfile(String username,
+                                  Integer location,
+                                  String major,
+                                  String task,
+                                  String selfIntroduction) {
+        this.username = username;
+        this.location.changeLocationType(location);
+        this.majors.get(0).changeMajor(major);
+        this.tasks.get(0).changeTask(task);
+        this.selfIntroduction = selfIntroduction;
     }
 
     public void updateUserProfile(List<String> internships,
@@ -134,7 +138,7 @@ public class User extends BaseEntity {
         createCertificates.forEach(certificate -> certificate.changeUser(this));
     }
 
-    public void updateLocation(Location location) {
+    public void updateLocation(UserLocation location) {
         this.location = location;
     }
 
