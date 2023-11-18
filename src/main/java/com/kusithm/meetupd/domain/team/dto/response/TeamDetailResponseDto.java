@@ -6,6 +6,8 @@ import com.kusithm.meetupd.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,18 +16,22 @@ import java.util.stream.Collectors;
 @Builder
 public class TeamDetailResponseDto {
 
-    public ResponseTeamMemeberDto leaderInfo;
+    private ResponseTeamMemeberDto leaderInfo;
     private String leaderMessage;
-    public int max;//모집할 인원수
-    public int cur;//합류한 인원수
-    public String location;//활동지역
-    public String endDate;//활동 종료 예정일
-    public String notice;//모집공고
-    public int leftMember;//남은 자리수 : 모집할 인원수 - 모집된 인원수
-    public List<ResponseTeamMemeberDto> teamMemeberInfos;
-    public int status; //나의 상태
+    private int max;//모집할 인원수
+    private int cur;//합류한 인원수
+    private String location;//활동지역
+    private String endDate;//활동 종료 예정일
+    private String notice;//모집공고
+    private int leftMember;//남은 자리수 : 모집할 인원수 - 모집된 인원수
+    private List<ResponseTeamMemeberDto> teamMemeberInfos;
+    private int status; //나의 상태
 
-    public static TeamDetailResponseDto of(Team team, User leader, List<User> teamMemeberInfos,int status) {
+    public static TeamDetailResponseDto of(Team team, User leader, List<User> teamMemeberInfos, int status) {
+
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(String.valueOf(team.getReviewDate()), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String formattedDate = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
         int max = team.getHeadCount();
         int cur = team.getTeamUsers().size();
         return TeamDetailResponseDto.builder()
@@ -34,9 +40,9 @@ public class TeamDetailResponseDto {
                 .max(max)
                 .cur(cur)
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
-                .endDate(String.valueOf(team.getReviewDate()))
+                .endDate(formattedDate)
                 .notice(team.getNotice())
-                .leftMember(max-cur)
+                .leftMember(max - cur)
                 .teamMemeberInfos(teamMemeberInfos.stream().map(ResponseTeamMemeberDto::new).collect(Collectors.toList()))
                 .status(status)
                 .build();

@@ -27,6 +27,8 @@ public enum ErrorCode {
      */
     WRONG_USER_PASSWORD(HttpStatus.FORBIDDEN, "입력하신 비밀번호가 올바르지 않습니다."),
     USER_NOT_HAVE_ENOUGH_TICKET(HttpStatus.FORBIDDEN, "보유한 티켓의 수가 부족합니다. 티켓을 충전해주세요."),
+    USER_NOT_TEAMLEADER(HttpStatus.FORBIDDEN, "해당 명령을 실행할 수 없습니다. 팀 리더가 아닙니다."),
+    USER_NOT_APPLY_STATUS(HttpStatus.FORBIDDEN, "팀에 지원 취소를 할 수 없습니다. 유저가 지원자 상태가 아닙니다."),
 
 
     /**

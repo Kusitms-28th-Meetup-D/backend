@@ -55,4 +55,8 @@ public class Team extends BaseEntity {
     public void updateLocation(Location location) {
         this.location = location;
     }
+
+    public void updateProgress(TeamProgressType teamProgressType) {
+        this.progress = teamProgressType.getNumber();
+    }
 }

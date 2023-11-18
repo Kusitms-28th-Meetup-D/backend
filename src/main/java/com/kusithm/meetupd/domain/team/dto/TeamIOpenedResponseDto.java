@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class TeamIOpenedResponseDto {
-    Long teamId;
-    int teamMemberSize;
-    int applyMemberSize;
-    List<ResponseTeamMemeberDto> teamMemberInfos;
-    List<ResponseTeamMemeberDto> applyMemberInfos;
-    String contestTitle;
-    List<String> contestImage;
+    private Long teamId;
+    private int teamMemberSize;
+    private int applyMemberSize;
+    private List<ResponseTeamMemeberDto> teamMemberInfos;
+    private List<ResponseTeamMemeberDto> applyMemberInfos;
+    private String contestTitle;
+    private List<String> contestImage;
 
     public static TeamIOpenedResponseDto of(Long teamId, List<User> teamMemberInfos, List<User> applyMemberInfos, Contest contest) {
         return TeamIOpenedResponseDto.builder()

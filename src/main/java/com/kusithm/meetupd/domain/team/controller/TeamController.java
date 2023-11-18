@@ -3,16 +3,14 @@ package com.kusithm.meetupd.domain.team.controller;
 import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.review.dto.request.UpdateTeamProgressRecruitmentRequestDto;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.TestDto;
-import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
-import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
-import com.kusithm.meetupd.domain.team.dto.response.TeamDetailResponseDto;
-import com.kusithm.meetupd.domain.team.dto.request.PageDto;
-import com.kusithm.meetupd.domain.team.dto.response.RecruitingContestTeamResponseDto;
-import com.kusithm.meetupd.domain.team.dto.response.TeamResponseDto;
+import com.kusithm.meetupd.domain.team.dto.request.*;
+import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.service.TeamService;
+import feign.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -67,8 +65,8 @@ public class TeamController {
 
     //팀 합류 신청
     @PostMapping("/apply")
-    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody Long teamId) {
-        teamService.applyTeam(userId, teamId);
+    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody ApplyTeamRequestDto dto) {
+        teamService.applyTeam(userId, dto.getTeamId());
         return SuccessResponse.of(SuccessCode.OK);
     }
 
@@ -79,10 +77,52 @@ public class TeamController {
         return SuccessResponse.of(SuccessCode.OK);
     }
 
+    // 팀 모집 취소
+    @DeleteMapping("/{teamId}")
+    public ResponseEntity<SuccessResponse> deleteTeam(@UserId Long userId, @PathVariable Long teamId) {
+        teamService.deleteTeam(userId, teamId);
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    // 팀 모집 중 -> 모집 완료로 상태 변경
+    @PatchMapping("/recruitment-complete")
+    public ResponseEntity<SuccessResponse> updateTeamProgressRecruitment(@UserId Long userId, @RequestBody UpdateTeamProgressRecruitmentRequestDto request) {
+        teamService.updateTeamProgressRecruitment(userId, request.getTeamId());
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    // 팀 지원 취소하기
+    @DeleteMapping("/cancel-apply/{teamId}")
+    public ResponseEntity<SuccessResponse> cancelApplyTeam(@UserId Long userId, @PathVariable Long teamId) {
+        teamService.cancelApplyTeam(userId, teamId);
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
     //내가 오픈한 팀
     @GetMapping("/opened-myself")
     public ResponseEntity<SuccessResponse<List<TeamIOpenedResponseDto>>> findTeamIOpen(@UserId Long userId) {
         List<TeamIOpenedResponseDto> response = teamService.findTeamIOpen(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    //내가 지원한 팀
+    @GetMapping("/applied-team")
+    public ResponseEntity<SuccessResponse<List<TeamIappliedResponseDto>>> findTeamIApplied(@UserId Long userId) {
+        List<TeamIappliedResponseDto> response = teamService.appliedTeam(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    //활동중인 팀
+    @GetMapping("/proceed-team")
+    public ResponseEntity<SuccessResponse<List<TeamProceedResponseDto>>> findTeamIProceed(@UserId Long userId) {
+        List<TeamProceedResponseDto> response = teamService.proceedTeam(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    //활동했던 팀
+    @GetMapping("/")
+    public ResponseEntity<SuccessResponse<List<TeamIWorkedResponseDto>>> findTeamIWorked(@UserId Long userId) {
+        List<TeamIWorkedResponseDto> response = teamService.workedTeam(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 }
