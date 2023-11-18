@@ -3,12 +3,14 @@ package com.kusithm.meetupd.domain.team.controller;
 import com.kusithm.meetupd.common.auth.UserId;
 import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
+import com.kusithm.meetupd.domain.review.dto.request.UpdateTeamProgressRecruitmentRequestDto;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.TestDto;
 import com.kusithm.meetupd.domain.team.dto.request.*;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.service.TeamService;
+import feign.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -72,6 +74,27 @@ public class TeamController {
     @PatchMapping("/change-role")
     public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody RequestChangeRoleDto requestChangeRoleDto) {
         teamService.changeRole(userId, requestChangeRoleDto);
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    // 팀 모집 취소
+    @DeleteMapping("/{teamId}")
+    public ResponseEntity<SuccessResponse> deleteTeam(@UserId Long userId, @PathVariable Long teamId) {
+        teamService.deleteTeam(userId, teamId);
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    // 팀 모집 중 -> 모집 완료로 상태 변경
+    @PatchMapping("/recruitment-complete")
+    public ResponseEntity<SuccessResponse> updateTeamProgressRecruitment(@UserId Long userId, @RequestBody UpdateTeamProgressRecruitmentRequestDto request) {
+        teamService.updateTeamProgressRecruitment(userId, request.getTeamId());
+        return SuccessResponse.of(SuccessCode.OK);
+    }
+
+    // 팀 지원 취소하기
+    @DeleteMapping("/cancel-apply/{teamId}")
+    public ResponseEntity<SuccessResponse> cancelApplyTeam(@UserId Long userId, @PathVariable Long teamId) {
+        teamService.cancelApplyTeam(userId, teamId);
         return SuccessResponse.of(SuccessCode.OK);
     }
 

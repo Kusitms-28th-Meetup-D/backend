@@ -14,9 +14,8 @@ public enum TeamUserRoleType {
 
     TEAM_LEADER(1, "팀장"),
     TEAM_MEMBER(2, "팀원"),
-    PASS(3, "합격자"),
-    FAILED(4, "반려자"),
-    VOLUNTEER(5, "지원자");
+    FAILED(3, "반려자"),
+    VOLUNTEER(4, "지원자");
 
     private final Integer code;
     private final String value;

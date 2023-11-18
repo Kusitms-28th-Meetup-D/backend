@@ -2,6 +2,7 @@ package com.kusithm.meetupd.domain.team.service;
 
 import com.kusithm.meetupd.common.error.ConflictException;
 import com.kusithm.meetupd.common.error.EntityNotFoundException;
+import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
@@ -11,6 +12,7 @@ import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.request.TeamProceedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
+import com.kusithm.meetupd.domain.team.entity.TeamProgressType;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import com.kusithm.meetupd.domain.team.entity.TeamUserRoleType;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
@@ -19,10 +21,14 @@ import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,11 +41,8 @@ import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEDDING;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
-import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
-import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
-import static org.apache.logging.log4j.ThreadContext.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +53,7 @@ public class TeamService {
     private final TeamUserRepository teamUserRepository;
     private final UserRepository userRepository;
     private final ContestRepository contestRepository;
+    private final MongoTemplate mongoTemplate;
 
     //진행상황에 맞는 팀 찾기
     public Page<Team> findTeamsCondition(PageDto dto, Integer teamProgress) {
@@ -165,7 +169,11 @@ public class TeamService {
         Team team = saveTeam(teamDto);
         team.getLocation().changeUser(user);
         team.getLocation().changeTeam(team);
+        Query query = createFindContestByIdQuery(team.getContestId());
+        Update update = new Update();
+        increaseContestRecruitTeamNumberInUpdate(update);
         saveTeamUser(TEAM_LEADER.getCode(), user, team);
+        mongoTemplate.updateMulti(query, update, Contest.class);
     }
 
     private void verifyCanOpenTeam(Integer role, Long userId) {
@@ -177,7 +185,9 @@ public class TeamService {
         verifyAlreadyApplyThisTeam(userId, teamId);
         User user = findUserById(userId);
         Team team = findTeamById(teamId);
+        team.getTeamUsers();
         saveTeamUser(VOLUNTEER.getCode(), user, team);
+
     }
 
     public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) {
@@ -187,6 +197,35 @@ public class TeamService {
             TeamUser teamUser = findTeamUserByUserIdAndTeamId(memberId, requestChangeRoleDto.getTeamId()).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
             teamUser.setRole(requestChangeRoleDto.getRole());
         } else throw new ConflictException(USER_NOT_HAVE_AUTHORITY);
+    }
+
+    public void deleteTeam(Long userId, Long teamId) {
+        TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+        if (!teamUser.equals(TEAM_LEADER.getCode())) {
+            throw new ForbiddenException(USER_NOT_TEAMLEADER);
+        }
+        Team team = findTeamById(teamId);
+        teamRepository.delete(team);
+    }
+
+    public void updateTeamProgressRecruitment(Long userId, Long teamId) {
+        TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+        if (!teamUser.equals(TEAM_LEADER.getCode())) {
+            throw new ForbiddenException(USER_NOT_TEAMLEADER);
+        }
+        Team team = findTeamById(teamId);
+        team.updateProgress(TeamProgressType.RECRUITMENT_COMPLETED);
+    }
+
+    public void cancelApplyTeam(Long userId, Long teamId) {
+        TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+        if (!teamUser.equals(VOLUNTEER.getCode())) {
+            throw new ForbiddenException(USER_NOT_APPLY_STATUS);
+        }
+        teamUserRepository.delete(teamUser);
     }
 
     private Team findTeamById(Long teamId) {
@@ -299,5 +338,18 @@ public class TeamService {
 
     private List<TeamUser> findTeamUserByUserIdAndRole(Long userId, Integer role) {
         return teamUserRepository.findAllByUserIdAndRole(userId, role);
+    }
+
+
+    private Query createFindContestByIdQuery(String contestId) {
+        return new Query(Criteria.where("_id").is(new ObjectId(contestId)));
+    }
+
+    private void increaseContestRecruitTeamNumberInUpdate(Update update) {
+        update.inc("team_num", 1);
+    }
+
+    private void decreaseContestRecruitTeamNumberInUpdate(Update update) {
+        update.inc("team_num", -1);
     }
 }
