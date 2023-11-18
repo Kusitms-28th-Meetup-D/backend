@@ -32,6 +32,12 @@ public class EmailService {
         emailSender.send(emailForm);
     }
 
+    @Async
+    public void sendEndTeamEmail(String toEmail, String teamName) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage emailForm = createEndTeamEmailForm(toEmail, teamName);
+        emailSender.send(emailForm);
+    }
+
     private MimeMessage createReceivedReviewEmailForm(String toEmail, String teamName) throws MessagingException, UnsupportedEncodingException {
         String setFrom = "ojy09293@gmail.com";
         String title = "[Wanteam] 신규 추천사 등록 안내";
@@ -57,7 +63,7 @@ public class EmailService {
         message.addRecipients(MimeMessage.RecipientType.TO, toEmail);
         message.setSubject(title);
         message.setFrom(new InternetAddress(setFrom, "Wanteam", "UTF-8"));
-        message.setText(setContextReviewedMail(teamName), "utf-8", "html");
+        message.setText(setContextJoinTeamMail(teamName), "utf-8", "html");
         return message;
     }
 
@@ -65,6 +71,24 @@ public class EmailService {
         Context context = new Context();
         context.setVariable("teamName", teamName);
         return templateEngine.process("join-team-mail", context);
+    }
+
+
+    private MimeMessage createEndTeamEmailForm(String toEmail, String teamName) throws MessagingException, UnsupportedEncodingException {
+        String setFrom = "ojy09293@gmail.com";
+        String title = "[Wanteam] 팀 활동 종료 안내 메일";
+        MimeMessage message = emailSender.createMimeMessage();
+        message.addRecipients(MimeMessage.RecipientType.TO, toEmail);
+        message.setSubject(title);
+        message.setFrom(new InternetAddress(setFrom, "Wanteam", "UTF-8"));
+        message.setText(setContextEndTeamMail(teamName), "utf-8", "html");
+        return message;
+    }
+
+    private String setContextEndTeamMail(String teamName) {
+        Context context = new Context();
+        context.setVariable("teamName", teamName);
+        return templateEngine.process("team-review-date-end-mail", context);
     }
 
 
