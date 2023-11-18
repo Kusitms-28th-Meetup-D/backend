@@ -19,10 +19,10 @@ public enum ChoiceCountType {
     MASTER_COMMUNICATION(3, "소통의 귀재"),
     LOGIC_KING(4,"논리의 왕"),
     VIBE_MAKER(5, "분위기 메이커"),
-    MASTER_READERSHIP(6, "꽉찬 리더십"),
-    STANDING_WATER(7, "경험가득 고인물"),
-    ALL_ROUNDER(8, "올라운더"),
-    LIGHT_SPEED(9, "빛의 작업속도");
+    IDEA_BANK(6, "아이디어 뱅크"),
+    DETAIL_GENIUS(7, "디테일 천재"),
+    BEST_TEAMWORK(8, "팀워크 최고"),
+    HARD_WORKER_ICON(9, "성실의 아이콘");
 
     private final Integer code;
 
