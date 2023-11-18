@@ -21,7 +21,7 @@ public enum TeamUserRoleType {
     private final Integer code;
     private final String value;
 
-    public TeamUserRoleType ofCode(int dbData) {
+    public static TeamUserRoleType ofCode(int dbData) {
         return Arrays.stream(TeamUserRoleType.values())
                 .filter(v -> v.getCode().equals(dbData))
                 .findAny()

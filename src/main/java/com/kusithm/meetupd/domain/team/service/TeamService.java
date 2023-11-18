@@ -8,9 +8,11 @@ import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
+import com.kusithm.meetupd.domain.team.dto.request.TeamProceedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
+import com.kusithm.meetupd.domain.team.entity.TeamUserRoleType;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
 import com.kusithm.meetupd.domain.team.mysql.TeamUserRepository;
 import com.kusithm.meetupd.domain.user.entity.User;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEDDING;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
@@ -220,10 +223,11 @@ public class TeamService {
 
     public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
         List<TeamIOpenedResponseDto> dtos = new ArrayList<>();
-        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, TEAM_LEADER.getCode());//내가 오픈한 팀을 찾고
+        Integer role = TEAM_LEADER.getCode();
+        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, role);//내가 오픈한 팀을 찾고
         for (TeamUser teamUser : teamUsersIOpened) {
             Team team = teamUser.getTeam();
-            if(compareTeamProgress(team,RECRUITING.getNumber())){
+            if (compareTeamProgress(team, RECRUITING.getNumber())) {
                 List<TeamUser> teamMember = findTeamUserByTeamIdAndRole(team.getId(), TEAM_MEMBER.getCode());
                 List<TeamUser> applyMember = findTeamUserByTeamIdAndRole(team.getId(), VOLUNTEER.getCode());
                 Contest contest = findContest(team.getContestId());
@@ -233,11 +237,55 @@ public class TeamService {
         return dtos;
     }
 
-    private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId,Integer role) {
-        return teamUserRepository.findAllByTeamIdAndRole(teamId,role);
+    public List<TeamIappliedResponseDto> appliedTeam(Long userId) {
+        List<TeamIappliedResponseDto> dtos = new ArrayList<>();
+        Integer role = TEAM_MEMBER.getCode();
+        //내가 팀장이 아닌 걸 찾아
+        List<TeamUser> findTeamUserIApplied = findTeamUserIApplied(userId, role);
+        for (TeamUser teamUser : findTeamUserIApplied) {
+            Team team = teamUser.getTeam();
+            if (team.getProgress().equals(RECRUITING.getNumber())) {
+                Contest contest = findContest(team.getContestId());
+                User leader = findTeamLeader(team.getId());
+                Integer status = teamUser.getRole();
+                dtos.add(TeamIappliedResponseDto.of(contest, leader, team, status));
+            }
+        }
+        return dtos;
     }
 
-    private boolean compareTeamProgress(Team team,Integer teamProgress) {
+    public List<TeamProceedResponseDto> proceedTeam(Long userId) {
+        List<TeamProceedResponseDto> dtos = new ArrayList<>();
+        Integer role = TEAM_MEMBER.getCode();
+        List<TeamUser> teamUserProceed = findTeamUserByUserIdAndRole(userId, role);
+        for (TeamUser teamUser : teamUserProceed) {
+            Team team = teamUser.getTeam();
+            if (team.getProgress().equals(PROCEDDING.getNumber())) {
+                Long teamId = team.getId();
+                Contest contest = findContest(team.getContestId());
+                User leader = findTeamLeader(teamId);
+                List<User> teamMember = findTeamMember(teamId);
+                dtos.add(TeamProceedResponseDto.of(team, contest, leader, teamMember));
+            }
+        }
+        return dtos;
+    }
+
+    public List<TeamIWorkedResponseDto> workedTeam(Long userId) {
+        List<TeamIWorkedResponseDto> dtos = new ArrayList<>();
+
+        return null;
+    }
+
+    private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
+        return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role);
+    }
+
+    private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {
+        return teamUserRepository.findAllByTeamIdAndRole(teamId, role);
+    }
+
+    private boolean compareTeamProgress(Team team, Integer teamProgress) {
         return team.getProgress().equals(teamProgress);
     }
 
