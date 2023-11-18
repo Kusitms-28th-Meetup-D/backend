@@ -5,6 +5,7 @@ import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
+import com.kusithm.meetupd.domain.email.service.EmailService;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
@@ -12,13 +13,12 @@ import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.request.TeamProceedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
-import com.kusithm.meetupd.domain.team.entity.TeamProgressType;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
-import com.kusithm.meetupd.domain.team.entity.TeamUserRoleType;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
 import com.kusithm.meetupd.domain.team.mysql.TeamUserRepository;
 import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -32,12 +32,15 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEDDING;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
@@ -54,6 +57,7 @@ public class TeamService {
     private final UserRepository userRepository;
     private final ContestRepository contestRepository;
     private final MongoTemplate mongoTemplate;
+    private final EmailService emailService;
 
     //진행상황에 맞는 팀 찾기
     public Page<Team> findTeamsCondition(PageDto dto, Integer teamProgress) {
@@ -215,7 +219,7 @@ public class TeamService {
             throw new ForbiddenException(USER_NOT_TEAMLEADER);
         }
         Team team = findTeamById(teamId);
-        team.updateProgress(TeamProgressType.RECRUITMENT_COMPLETED);
+        team.updateProgress(RECRUITMENT_COMPLETED);
     }
 
     public void cancelApplyTeam(Long userId, Long teamId) {
@@ -315,6 +319,39 @@ public class TeamService {
         return null;
     }
 
+    public List<Team> updateTeamProgressEnd() throws MessagingException, UnsupportedEncodingException {
+        List<Team> teams = getReviewDateAfterTeam(createTodayDateTimeEnd());
+        for(Team team: teams) {
+            team.updateProgress(PROGRESS_ENDED);
+            sendTeamEndReview(team);
+        }
+        return teams;
+    }
+
+    private List<TeamUser> sendTeamEndReview(Team team) throws MessagingException, UnsupportedEncodingException {
+        List<TeamUser> teamUsers = findTeamUserLeaderOrMember(team);
+        for (TeamUser teamUser : teamUsers) {
+            sendTeamReviewDateAfterEmail(teamUser);
+        }
+        return teamUsers;
+    }
+
+    private void sendTeamReviewDateAfterEmail(TeamUser teamUser) throws MessagingException, UnsupportedEncodingException {
+        User user = teamUser.getUser();
+        Team team = teamUser.getTeam();
+        Contest contest = findContest(team.getContestId());
+        emailService.sendEndTeamEmail(user.getEmail(), contest.getTitle());
+    }
+
+    private List<TeamUser> findTeamUserLeaderOrMember(Team team) {
+        return teamUserRepository.findAllByTeamIdAndRoleLessThanEqual(team.getId(), TEAM_MEMBER.getCode());
+    }
+
+    private List<Team> getReviewDateAfterTeam(Date date) {
+        System.out.println(date);
+        return teamRepository.findAllByReviewDateLessThanAndProgress(date, 3);
+    }
+
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
         return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role);
     }
@@ -350,5 +387,15 @@ public class TeamService {
 
     private void decreaseContestRecruitTeamNumberInUpdate(Update update) {
         update.inc("team_num", -1);
+    }
+
+    private Date createTodayDateTimeEnd() {
+        Calendar cal = Calendar.getInstance();
+        Date startDate = cal.getTime();
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTime();
     }
 }
