@@ -3,6 +3,8 @@ package com.kusithm.meetupd.domain.team.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Getter
@@ -16,6 +18,9 @@ public class TeamIWorkedResponseDto {
     private List<ResponseTeamMemeberDto> teamMemeberInfos;
 
 //    public static TeamIWorkedResponseDto of(String contestTitle){
+//DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
+//    String formattedDate = sdFormat.format(team.getReviewDate());
+
 //        return TeamIWorkedResponseDto.builder()
 //                .contestTitle(contestTitle)
 //                .endDate()

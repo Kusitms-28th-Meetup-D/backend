@@ -8,6 +8,8 @@ import com.kusithm.meetupd.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -32,8 +34,8 @@ public class TeamIappliedResponseDto {
 
     public static TeamIappliedResponseDto of(Contest contest, User leader, Team team, Integer status){
 
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(String.valueOf(team.getReviewDate()), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        String formattedEndDate = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedEndDate = sdFormat.format(team.getReviewDate());
 
         return TeamIappliedResponseDto.builder()
                 .contestId(contest.getId())
