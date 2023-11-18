@@ -1,12 +1,9 @@
 package com.kusithm.meetupd.domain.team.entity;
 
 import com.kusithm.meetupd.common.entity.BaseEntity;
-import com.kusithm.meetupd.domain.user.entity.Location;
 import com.kusithm.meetupd.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-
-import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 
 @Entity
 @Getter
