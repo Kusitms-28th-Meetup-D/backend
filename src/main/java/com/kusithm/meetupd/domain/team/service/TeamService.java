@@ -6,6 +6,8 @@ import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.email.service.EmailService;
+import com.kusithm.meetupd.domain.review.mongo.WaitReviewRepository;
+import com.kusithm.meetupd.domain.review.mysql.UserReviewedTeamRepository;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
@@ -55,6 +57,7 @@ public class TeamService {
     private final ContestRepository contestRepository;
     private final MongoTemplate mongoTemplate;
     private final EmailService emailService;
+    private final UserReviewedTeamRepository userReviewedTeamRepository;
 
     //진행상황에 맞는 팀 찾기
     public Page<Team> findTeamsCondition(PageDto dto, Integer teamProgress) {
@@ -112,7 +115,61 @@ public class TeamService {
         User teamLeader = findTeamLeader(teamId);
         List<User> teamMember = findTeamMember(teamId);
         int status = decideStatus(userId, teamLeader.getId(), teamId);
-        return TeamDetailResponseDto.of(team, teamLeader, teamMember, status);
+        return TeamDetailResponseDto.of(team, findTeamLeader(teamId), teamMember, status);
+    }
+
+    public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
+        List<TeamIOpenedResponseDto> dtos = new ArrayList<>();
+        Integer role = TEAM_LEADER.getCode();
+        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, role);//내가 오픈한 팀을 찾고
+        for (TeamUser teamUser : teamUsersIOpened) {
+            Team team = findTeamUserByTeam(teamUser);
+            Long teamId = team.getId();
+            if (compareTeamProgress(team, RECRUITING.getNumber())) {
+                List<TeamUser> teamMember = findTeamUserByTeamIdAndRole(teamId, TEAM_MEMBER.getCode());
+                List<TeamUser> applyMember = findTeamUserByTeamIdAndRole(teamId, VOLUNTEER.getCode());
+                dtos.add(TeamIOpenedResponseDto.of(team, findUserThroughTeamUser(teamMember), findUserThroughTeamUser(applyMember), findContest(team.getContestId())));
+            }
+        }
+        return dtos;
+    }
+
+    public List<TeamIappliedResponseDto> appliedTeam(Long userId) {
+        List<TeamIappliedResponseDto> dtos = new ArrayList<>();
+        List<TeamUser> appliedReamUsers = findTeamUserIApplied(userId, TEAM_MEMBER.getCode());
+        for (TeamUser teamUser : appliedReamUsers) {
+            Team team = findTeamUserByTeam(teamUser);
+            if (team.getProgress().equals(RECRUITING.getNumber())) {
+                dtos.add(TeamIappliedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(team.getId()), teamUser.getRole()));
+            }
+        }
+        return dtos;
+    }
+
+    public List<TeamProceedResponseDto> proceedTeam(Long userId) {
+        List<TeamProceedResponseDto> dtos = new ArrayList<>();
+        List<TeamUser> teamUserProceed = findTeaMemberAndTeamUser(userId);
+        for (TeamUser teamUser : teamUserProceed) {
+            Team team = findTeamUserByTeam(teamUser);
+            if (team.getProgress().equals(PROCEDDING.getNumber())) {
+                Long teamId = team.getId();
+                dtos.add(TeamProceedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId)));
+            }
+        }
+        return dtos;
+    }
+
+    public List<TeamIWorkedResponseDto> workedTeam(Long userId) {
+        List<TeamIWorkedResponseDto> dtos = new ArrayList<>();
+        List<TeamUser> teamMemberAndTeamUser = findTeaMemberAndTeamUser(userId);
+        for (TeamUser teamUser : teamMemberAndTeamUser) {
+            Team team = findTeamUserByTeam(teamUser);
+            if (team.getProgress().equals(PROGRESS_ENDED.getNumber())) {
+                Long teamId = team.getId();
+                dtos.add(TeamIWorkedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId), checkUserReviewThisTeam(userId, teamId)));
+            }
+        }
+        return dtos;
     }
 
     private int decideStatus(Long userId, Long leaderId, Long teamId) {
@@ -184,11 +241,7 @@ public class TeamService {
 
     public void applyTeam(Long userId, Long teamId) {
         verifyAlreadyApplyThisTeam(userId, teamId);
-        User user = findUserById(userId);
-        Team team = findTeamById(teamId);
-        team.getTeamUsers();
-        saveTeamUser(VOLUNTEER.getCode(), user, team);
-
+        saveTeamUser(VOLUNTEER.getCode(), findUserById(userId), findTeamById(teamId));
     }
 
     public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) throws MessagingException, UnsupportedEncodingException {
@@ -200,13 +253,13 @@ public class TeamService {
             validateUserRoleIsVolunteer(teamUser);
             teamUser.setRole(requestChangeRoleDto.getRole());
         } else throw new ConflictException(USER_NOT_HAVE_AUTHORITY);
-        if(requestChangeRoleDto.getRole().equals(TEAM_MEMBER.getCode())) {
+        if (requestChangeRoleDto.getRole().equals(TEAM_MEMBER.getCode())) {
             Team team = findTeamById(requestChangeRoleDto.getTeamId());
             User user = findUserById(memberId);
             Contest contest = findContest(team.getContestId());
             emailService.sendJoinTeamEmail(user.getEmail(), contest.getTitle(), team.getChatLink());
             List<TeamUser> teamMembers = findTeamUserByTeamIdAndRole(requestChangeRoleDto.getTeamId(), TEAM_MEMBER.getCode());
-            if(teamMembers.size() == team.getHeadCount()) {
+            if (teamMembers.size() == team.getHeadCount()) {
                 team.updateProgress(RECRUITMENT_COMPLETED);
                 contestTeamCountDecrease(team);
             }
@@ -277,65 +330,19 @@ public class TeamService {
             throw new ConflictException(ALREADY_USER_APPLY_TEAM);
     }
 
-    public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
-        List<TeamIOpenedResponseDto> dtos = new ArrayList<>();
-        Integer role = TEAM_LEADER.getCode();
-        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, role);//내가 오픈한 팀을 찾고
-        for (TeamUser teamUser : teamUsersIOpened) {
-            Team team = teamUser.getTeam();
-            if (compareTeamProgress(team, RECRUITING.getNumber())) {
-                List<TeamUser> teamMember = findTeamUserByTeamIdAndRole(team.getId(), TEAM_MEMBER.getCode());
-                List<TeamUser> applyMember = findTeamUserByTeamIdAndRole(team.getId(), VOLUNTEER.getCode());
-                Contest contest = findContest(team.getContestId());
-                dtos.add(TeamIOpenedResponseDto.of(team.getId(), findUserThroughTeamUser(teamMember), findUserThroughTeamUser(applyMember), contest));
-            }
-        }
-        return dtos;
+    private static Team findTeamUserByTeam(TeamUser teamUser) {
+        Team team = teamUser.getTeam();
+        return team;
     }
 
-    public List<TeamIappliedResponseDto> appliedTeam(Long userId) {
-        List<TeamIappliedResponseDto> dtos = new ArrayList<>();
-        Integer role = TEAM_MEMBER.getCode();
-        //내가 팀장이 아닌 걸 찾아
-        List<TeamUser> findTeamUserIApplied = findTeamUserIApplied(userId, role);
-        for (TeamUser teamUser : findTeamUserIApplied) {
-            Team team = teamUser.getTeam();
-            if (team.getProgress().equals(RECRUITING.getNumber())) {
-                Contest contest = findContest(team.getContestId());
-                User leader = findTeamLeader(team.getId());
-                Integer status = teamUser.getRole();
-                dtos.add(TeamIappliedResponseDto.of(contest, leader, team, status));
-            }
-        }
-        return dtos;
+    private List<TeamUser> findTeaMemberAndTeamUser(Long userId) {
+        return findTeamUserLessThan(userId, TEAM_MEMBER.getCode());
     }
 
-    public List<TeamProceedResponseDto> proceedTeam(Long userId) {
-        List<TeamProceedResponseDto> dtos = new ArrayList<>();
-        Integer role = TEAM_MEMBER.getCode();
-        List<TeamUser> teamUserProceed = findTeamUserLessThan(userId, role);
-        for (TeamUser teamUser : teamUserProceed) {
-            Team team = teamUser.getTeam();
-            if (team.getProgress().equals(PROCEDDING.getNumber())) {
-                Long teamId = team.getId();
-                Contest contest = findContest(team.getContestId());
-                User leader = findTeamLeader(teamId);
-                List<User> teamMember = findTeamMember(teamId);
-                dtos.add(TeamProceedResponseDto.of(team, contest, leader, teamMember));
-            }
-        }
-        return dtos;
-    }
-
-    public List<TeamIWorkedResponseDto> workedTeam(Long userId) {
-        List<TeamIWorkedResponseDto> dtos = new ArrayList<>();
-
-        return null;
-    }
 
     public List<Team> updateTeamProgressEnd() throws MessagingException, UnsupportedEncodingException {
         List<Team> teams = getReviewDateAfterTeam(createTodayDateTimeEnd());
-        for(Team team: teams) {
+        for (Team team : teams) {
             team.updateProgress(PROGRESS_ENDED);
             sendTeamEndReview(team);
         }
@@ -352,7 +359,7 @@ public class TeamService {
 
     private void sendTeamReviewDateAfterEmail(TeamUser teamUser) throws MessagingException, UnsupportedEncodingException {
         User user = teamUser.getUser();
-        Team team = teamUser.getTeam();
+        Team team = findTeamUserByTeam(teamUser);
         Contest contest = findContest(team.getContestId());
         emailService.sendEndTeamEmail(user.getEmail(), contest.getTitle());
     }
@@ -367,11 +374,11 @@ public class TeamService {
     }
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
-        return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role);
+        return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role); //>=
     }
 
     private List<TeamUser> findTeamUserLessThan(Long userId, Integer role) {
-        return teamUserRepository.findAllByUserIdAndRoleLessThanEqual(userId, role);
+        return teamUserRepository.findAllByUserIdAndRoleLessThanEqual(userId, role); //<=
     }
 
     private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {
@@ -380,10 +387,6 @@ public class TeamService {
 
     private boolean compareTeamProgress(Team team, Integer teamProgress) {
         return team.getProgress().equals(teamProgress);
-    }
-
-    private List<Team> findTeamByProgress(Integer progress) {
-        return teamRepository.findAllByProgress(progress);
     }
 
     public List<User> findUserThroughTeamUser(List<TeamUser> teamUsers) {
@@ -425,7 +428,7 @@ public class TeamService {
     }
 
     private void validateUserRoleIsVolunteer(TeamUser teamUser) {
-        if(!teamUser.getRole().equals(VOLUNTEER.getCode())) {
+        if (!teamUser.getRole().equals(VOLUNTEER.getCode())) {
             throw new ForbiddenException(USER_ROLE_NOT_CHANGE);
         }
     }
@@ -434,5 +437,9 @@ public class TeamService {
         if (!team.getProgress().equals(RECRUITING.getNumber())) {
             throw new ForbiddenException(TEAM_PROGRESS_NOT_RECRUITING);
         }
+    }
+
+    private Boolean checkUserReviewThisTeam(Long userId, Long teamId) {
+        return userReviewedTeamRepository.existsByUserIdAndTeamId(userId, teamId);
     }
 }
