@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.*;
-import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEDDING;
+import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEEDING;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
@@ -113,6 +113,11 @@ public class TeamService {
         List<User> teamMember = findTeamMember(teamId);
         int status = decideStatus(userId, teamLeader.getId(), teamId);
         return TeamDetailResponseDto.of(team, teamLeader, teamMember, status);
+    }
+
+    public void updateTeamProgressProceeding(String contestId) {
+        List<Team> teams = findTeamByContentIdAndProgress(contestId, RECRUITMENT_COMPLETED.getNumber());
+        teams.forEach(team -> team.updateProgress(PROCEEDING));
     }
 
     private int decideStatus(Long userId, Long leaderId, Long teamId) {
@@ -316,7 +321,7 @@ public class TeamService {
         List<TeamUser> teamUserProceed = findTeamUserLessThan(userId, role);
         for (TeamUser teamUser : teamUserProceed) {
             Team team = teamUser.getTeam();
-            if (team.getProgress().equals(PROCEDDING.getNumber())) {
+            if (team.getProgress().equals(PROCEEDING.getNumber())) {
                 Long teamId = team.getId();
                 Contest contest = findContest(team.getContestId());
                 User leader = findTeamLeader(teamId);
@@ -363,7 +368,7 @@ public class TeamService {
 
     private List<Team> getReviewDateAfterTeam(Date date) {
         System.out.println(date);
-        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEDDING.getNumber());
+        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEEDING.getNumber());
     }
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
