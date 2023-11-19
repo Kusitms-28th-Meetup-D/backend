@@ -5,10 +5,7 @@ import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
-import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
-import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
-import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
-import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
+import com.kusithm.meetupd.domain.review.dto.response.*;
 import com.kusithm.meetupd.domain.review.service.ReviewService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +22,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    // 유저 리뷰 정보 확인
+    // 유저 리뷰 정보 확인 API
     @GetMapping("/info/{userId}")
     public ResponseEntity<SuccessResponse<GetUserReviewResponseDto>> getUserReviewByUserId (@PathVariable Long userId) {
         GetUserReviewResponseDto response = reviewService.getUserReviewByUserId(userId);
@@ -46,7 +43,7 @@ public class ReviewController {
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
-    // 비 회원이 리뷰 작성
+    // 비 회원이 리뷰 작성 API
     @PostMapping("/non-user")
     public ResponseEntity<SuccessResponse<UploadReviewResponseDto>> checkUserReviewedByNonUser(@RequestBody NonUserReviewRequestDto request) throws MessagingException, UnsupportedEncodingException {
         UploadReviewResponseDto response = reviewService.uploadNonUserReview(request);
@@ -57,6 +54,13 @@ public class ReviewController {
     @GetMapping("/non-user/check/{userId}")
     public ResponseEntity<SuccessResponse<CheckUserReviewedByNonUserResponseDto>> checkUserReviewedByNonUser(@PathVariable Long userId) {
         CheckUserReviewedByNonUserResponseDto response = reviewService.checkUserReviewedByNonUser(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    // 활동 후 내가 다른 사람에게 리뷰를 안남겼는지 확인하는 API
+    @GetMapping("/not-review-team")
+    public ResponseEntity<SuccessResponse<CheckUserNotReviewTeamResponseDto>> checkUserNotReviewTeam(@UserId Long userId) {
+        CheckUserNotReviewTeamResponseDto response = reviewService.checkUserNotReview(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 }

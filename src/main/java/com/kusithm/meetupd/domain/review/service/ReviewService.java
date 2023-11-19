@@ -7,10 +7,7 @@ import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.email.service.EmailService;
 import com.kusithm.meetupd.domain.review.dto.request.NonUserReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
-import com.kusithm.meetupd.domain.review.dto.response.CheckUserReviewedByNonUserResponseDto;
-import com.kusithm.meetupd.domain.review.dto.response.GetIsUserReviewTeamResponseDto;
-import com.kusithm.meetupd.domain.review.dto.response.GetUserReviewResponseDto;
-import com.kusithm.meetupd.domain.review.dto.response.UploadReviewResponseDto;
+import com.kusithm.meetupd.domain.review.dto.response.*;
 import com.kusithm.meetupd.domain.review.entity.NonUserReview;
 import com.kusithm.meetupd.domain.review.entity.Review;
 import com.kusithm.meetupd.domain.review.entity.UserReviewedTeam;
@@ -38,7 +35,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.review.entity.WaitReview.createWaitReviewByNonUserRequest;
@@ -64,7 +60,6 @@ public class ReviewService {
     }
 
     public GetUserReviewResponseDto getUserReviewByUserId(Long userId) {
-        validateUserExist(userId);
         Review review = getReviewByUserId(userId);
         return GetUserReviewResponseDto.of(review);
     }
@@ -83,7 +78,6 @@ public class ReviewService {
     }
 
     public GetIsUserReviewTeamResponseDto isUserReviewThisTeam(Long userId, Long teamId) {
-        validateUserExist(userId);
         return GetIsUserReviewTeamResponseDto.of(checkUserReviewThisTeam(userId, teamId));
     }
 
@@ -92,15 +86,20 @@ public class ReviewService {
         validateUserAlreadyReviewedByNonUser(request.getUserId());
         WaitReview waitReview = createWaitReviewByNonUserRequest(request);
         uploadNonUserReview(waitReview);
-        sendReviewUploadEmail(waitReview);
+        User user = findUserById(request.getUserId());
+        sendNonReviewUploadEmail(user);
         saveNonUserReviewedState(request.getUserId());
         return UploadReviewResponseDto.of("추천사 작성을 성공했어요!");
     }
 
 
     public CheckUserReviewedByNonUserResponseDto checkUserReviewedByNonUser(Long userId) {
-        validateUserExist(userId);
         return CheckUserReviewedByNonUserResponseDto.of(checkUserAlreadyReviewedByNonUser(userId));
+    }
+
+    public CheckUserNotReviewTeamResponseDto checkUserNotReview(Long userId) {
+        Boolean isUserNotReview = checkUserNotUploadReview(userId);
+        return CheckUserNotReviewTeamResponseDto.of(isUserNotReview);
     }
 
     private Long getTeamId(UploadReviewRequestDto request) {
@@ -131,13 +130,17 @@ public class ReviewService {
     }
 
     private void sendReviewUploadEmail(WaitReview waitReview) throws MessagingException, UnsupportedEncodingException {
-        User user = getUserRepositoryById(waitReview.getUserId());
+        User user = findUserById(waitReview.getUserId());
         Team team = getTeamById(waitReview.getTeamId());
         Contest contest = getContestById(team.getContestId());
         emailService.sendReceivedReviewEmail(user.getEmail(), contest.getTitle());
     }
 
-    private User getUserRepositoryById(Long userId) {
+    private void sendNonReviewUploadEmail(User user) throws MessagingException, UnsupportedEncodingException {
+        emailService.sendReceivedReviewEmail(user.getEmail(), "비회원 리뷰");
+    }
+
+    private User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
@@ -147,7 +150,6 @@ public class ReviewService {
         List<WaitReview> userWaitReviews = getWaitReviewsByUserAndTeam(userId, teamId);
         userWaitReviews.forEach(this::uploadReview);
         userWaitReviews.forEach(this::deleteWaitReview);
-
         return userWaitReviews.isEmpty() ? "추천사를 성공적으로 등록했습니다.": "추천사를 성공적으로 등록했습니다.\n회원님에게 새로운 추천사가 등록되었습니다.";
     }
 
@@ -258,5 +260,9 @@ public class ReviewService {
     private void saveNonUserReviewedState(Long userId) {
         NonUserReview nonUserReview = NonUserReview.createNonUserReview(userId);
         nonUserReviewRepository.save(nonUserReview);
+    }
+
+    private Boolean checkUserNotUploadReview(Long userId){
+        return waitReviewRepository.existsByUserId(userId);
     }
 }
