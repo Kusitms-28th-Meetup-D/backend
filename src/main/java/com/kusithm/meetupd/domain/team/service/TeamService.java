@@ -313,7 +313,7 @@ public class TeamService {
     public List<TeamProceedResponseDto> proceedTeam(Long userId) {
         List<TeamProceedResponseDto> dtos = new ArrayList<>();
         Integer role = TEAM_MEMBER.getCode();
-        List<TeamUser> teamUserProceed = findTeamUserByUserIdAndRole(userId, role);
+        List<TeamUser> teamUserProceed = findTeamUserLessThan(userId, role);
         for (TeamUser teamUser : teamUserProceed) {
             Team team = teamUser.getTeam();
             if (team.getProgress().equals(PROCEDDING.getNumber())) {
@@ -368,6 +368,10 @@ public class TeamService {
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
         return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role);
+    }
+
+    private List<TeamUser> findTeamUserLessThan(Long userId, Integer role) {
+        return teamUserRepository.findAllByUserIdAndRoleLessThanEqual(userId, role);
     }
 
     private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {

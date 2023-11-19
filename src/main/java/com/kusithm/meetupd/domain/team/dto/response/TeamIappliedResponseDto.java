@@ -10,8 +10,7 @@ import lombok.Getter;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -32,23 +31,37 @@ public class TeamIappliedResponseDto {
     public String endDate;//활동 종료 예정일
 
 
-    public static TeamIappliedResponseDto of(Contest contest, User leader, Team team, Integer status){
+    public static TeamIappliedResponseDto of(Contest contest, User leader, Team team, Integer status) {
 
-        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedEndDate = sdFormat.format(team.getReviewDate());
 
+        String userRole = TeamUserRoleType.ofCode(status).getValue();
         return TeamIappliedResponseDto.builder()
                 .contestId(contest.getId())
                 .contestTitle(contest.getTitle())
                 .contestImage(contest.getContestImages())
                 .leaderInfo(new ResponseTeamMemeberDto(leader))
                 .teamId(team.getId())
-                .status(TeamUserRoleType.ofCode(status).getValue())
+                .status(manufactureStatus(status))
                 .leaderMessage(team.getLeaderMessage())
                 .max(team.getHeadCount())
                 .cur(team.getTeamUsers().size())
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
-                .endDate(formattedEndDate)
+                .endDate(formatDate(team.getReviewDate()))
                 .build();
+
+    }
+
+    public static String formatDate(Date date){
+        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return sdFormat.format(date);
+    }
+
+    public static String manufactureStatus(Integer status) {
+        return switch (status) {
+            case 2 -> "합류";
+            case 3 -> "반려";
+            case 4 -> "검토 중";
+            default -> null;
+        };
     }
 }
