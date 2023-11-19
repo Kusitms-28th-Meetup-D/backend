@@ -5,6 +5,7 @@ import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
+import com.kusithm.meetupd.domain.email.service.EmailService;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
 import com.kusithm.meetupd.domain.team.dto.request.RequestChangeRoleDto;
@@ -12,13 +13,12 @@ import com.kusithm.meetupd.domain.team.dto.request.RequestCreateTeamDto;
 import com.kusithm.meetupd.domain.team.dto.request.TeamProceedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
-import com.kusithm.meetupd.domain.team.entity.TeamProgressType;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
-import com.kusithm.meetupd.domain.team.entity.TeamUserRoleType;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
 import com.kusithm.meetupd.domain.team.mysql.TeamUserRepository;
 import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -32,12 +32,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
+import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEDDING;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
@@ -54,6 +54,7 @@ public class TeamService {
     private final UserRepository userRepository;
     private final ContestRepository contestRepository;
     private final MongoTemplate mongoTemplate;
+    private final EmailService emailService;
 
     //진행상황에 맞는 팀 찾기
     public Page<Team> findTeamsCondition(PageDto dto, Integer teamProgress) {
@@ -152,7 +153,8 @@ public class TeamService {
     }
 
     private User findTeamLeader(Long teamId) {
-        return findTeamUserByRoleAndTeamId(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst().orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        return findTeamUserByRoleAndTeamId(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst()
+                .orElseThrow(() -> new ForbiddenException(USER_NOT_TEAMLEADER));
     }
 
     public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
@@ -189,14 +191,28 @@ public class TeamService {
 
     }
 
-    public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) {
+    public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) throws MessagingException, UnsupportedEncodingException {
         Long teamLeaderId = findTeamLeader(requestChangeRoleDto.getTeamId()).getId();
         Long memberId = requestChangeRoleDto.getMemberId();
         if (userId.equals(teamLeaderId)) { //팀장이라면 권한 수정
             TeamUser teamUser = findTeamUserByUserIdAndTeamId(memberId, requestChangeRoleDto.getTeamId()).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+            validateTeamProgressRecruiting(teamUser.getTeam());
+            validateUserRoleIsVolunteer(teamUser);
             teamUser.setRole(requestChangeRoleDto.getRole());
         } else throw new ConflictException(USER_NOT_HAVE_AUTHORITY);
+        if(requestChangeRoleDto.getRole().equals(TEAM_MEMBER.getCode())) {
+            Team team = findTeamById(requestChangeRoleDto.getTeamId());
+            User user = findUserById(memberId);
+            Contest contest = findContest(team.getContestId());
+            emailService.sendJoinTeamEmail(user.getEmail(), contest.getTitle(), team.getChatLink());
+            List<TeamUser> teamMembers = findTeamUserByTeamIdAndRole(requestChangeRoleDto.getTeamId(), TEAM_MEMBER.getCode());
+            if(teamMembers.size() == team.getHeadCount()) {
+                team.updateProgress(RECRUITMENT_COMPLETED);
+                contestTeamCountDecrease(team);
+            }
+        }
     }
+
 
     public void deleteTeam(Long userId, Long teamId) {
         TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
@@ -215,7 +231,9 @@ public class TeamService {
             throw new ForbiddenException(USER_NOT_TEAMLEADER);
         }
         Team team = findTeamById(teamId);
-        team.updateProgress(TeamProgressType.RECRUITMENT_COMPLETED);
+        validateTeamProgressRecruiting(team);
+        team.updateProgress(RECRUITMENT_COMPLETED);
+        contestTeamCountDecrease(team);
     }
 
     public void cancelApplyTeam(Long userId, Long teamId) {
@@ -295,7 +313,7 @@ public class TeamService {
     public List<TeamProceedResponseDto> proceedTeam(Long userId) {
         List<TeamProceedResponseDto> dtos = new ArrayList<>();
         Integer role = TEAM_MEMBER.getCode();
-        List<TeamUser> teamUserProceed = findTeamUserByUserIdAndRole(userId, role);
+        List<TeamUser> teamUserProceed = findTeamUserLessThan(userId, role);
         for (TeamUser teamUser : teamUserProceed) {
             Team team = teamUser.getTeam();
             if (team.getProgress().equals(PROCEDDING.getNumber())) {
@@ -315,8 +333,45 @@ public class TeamService {
         return null;
     }
 
+    public List<Team> updateTeamProgressEnd() throws MessagingException, UnsupportedEncodingException {
+        List<Team> teams = getReviewDateAfterTeam(createTodayDateTimeEnd());
+        for(Team team: teams) {
+            team.updateProgress(PROGRESS_ENDED);
+            sendTeamEndReview(team);
+        }
+        return teams;
+    }
+
+    private List<TeamUser> sendTeamEndReview(Team team) throws MessagingException, UnsupportedEncodingException {
+        List<TeamUser> teamUsers = findTeamUserLeaderOrMember(team);
+        for (TeamUser teamUser : teamUsers) {
+            sendTeamReviewDateAfterEmail(teamUser);
+        }
+        return teamUsers;
+    }
+
+    private void sendTeamReviewDateAfterEmail(TeamUser teamUser) throws MessagingException, UnsupportedEncodingException {
+        User user = teamUser.getUser();
+        Team team = teamUser.getTeam();
+        Contest contest = findContest(team.getContestId());
+        emailService.sendEndTeamEmail(user.getEmail(), contest.getTitle());
+    }
+
+    private List<TeamUser> findTeamUserLeaderOrMember(Team team) {
+        return teamUserRepository.findAllByTeamIdAndRoleLessThanEqual(team.getId(), TEAM_MEMBER.getCode());
+    }
+
+    private List<Team> getReviewDateAfterTeam(Date date) {
+        System.out.println(date);
+        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEDDING.getNumber());
+    }
+
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
         return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role);
+    }
+
+    private List<TeamUser> findTeamUserLessThan(Long userId, Integer role) {
+        return teamUserRepository.findAllByUserIdAndRoleLessThanEqual(userId, role);
     }
 
     private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {
@@ -344,11 +399,40 @@ public class TeamService {
         return new Query(Criteria.where("_id").is(new ObjectId(contestId)));
     }
 
+    private void contestTeamCountDecrease(Team team) {
+        Query query = createFindContestByIdQuery(team.getContestId());
+        Update update = new Update();
+        decreaseContestRecruitTeamNumberInUpdate(update);
+        mongoTemplate.updateMulti(query, update, Contest.class);
+    }
+
     private void increaseContestRecruitTeamNumberInUpdate(Update update) {
         update.inc("team_num", 1);
     }
 
     private void decreaseContestRecruitTeamNumberInUpdate(Update update) {
         update.inc("team_num", -1);
+    }
+
+    private Date createTodayDateTimeEnd() {
+        Calendar cal = Calendar.getInstance();
+        Date startDate = cal.getTime();
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTime();
+    }
+
+    private void validateUserRoleIsVolunteer(TeamUser teamUser) {
+        if(!teamUser.getRole().equals(VOLUNTEER.getCode())) {
+            throw new ForbiddenException(USER_ROLE_NOT_CHANGE);
+        }
+    }
+
+    private void validateTeamProgressRecruiting(Team team) {
+        if (!team.getProgress().equals(RECRUITING.getNumber())) {
+            throw new ForbiddenException(TEAM_PROGRESS_NOT_RECRUITING);
+        }
     }
 }
