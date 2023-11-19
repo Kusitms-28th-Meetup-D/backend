@@ -279,10 +279,10 @@ public class TeamService {
 
     public List<TeamProceedResponseDto> proceedTeam(Long userId) {
         List<TeamProceedResponseDto> dtos = new ArrayList<>();
-        List<TeamUser> teamUserProceed = findTeaMemberAndTeamUser(userId);
+        List<TeamUser> teamUserProceed = findTeamMemberAndTeamUser(userId);
         for (TeamUser teamUser : teamUserProceed) {
             Team team = findTeamUserByTeam(teamUser);
-            if (team.getProgress().equals(PROCEDDING.getNumber())) {
+            if (team.getProgress().equals(PROCEEDING.getNumber())) {
                 Long teamId = team.getId();
                 dtos.add(TeamProceedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId)));
             }
@@ -292,7 +292,7 @@ public class TeamService {
 
     public List<TeamIWorkedResponseDto> workedTeam(Long userId) {
         List<TeamIWorkedResponseDto> dtos = new ArrayList<>();
-        List<TeamUser> teamMemberAndTeamUser = findTeaMemberAndTeamUser(userId);
+        List<TeamUser> teamMemberAndTeamUser = findTeamMemberAndTeamUser(userId);
         for (TeamUser teamUser : teamMemberAndTeamUser) {
             Team team = findTeamUserByTeam(teamUser);
             if (team.getProgress().equals(PROGRESS_ENDED.getNumber())) {
@@ -301,6 +301,14 @@ public class TeamService {
             }
         }
         return dtos;
+    }
+
+    private List<TeamUser> findTeamMemberAndTeamUser(Long userId) {
+        return findTeamUserLessThan(userId, TEAM_MEMBER.getCode());
+    }
+
+    private Team findTeamUserByTeam(TeamUser teamUser) {
+        return teamUser.getTeam();
     }
 
     private Team findTeamById(Long teamId) {
@@ -365,7 +373,7 @@ public class TeamService {
 
     private List<Team> getReviewDateAfterTeam(Date date) {
         System.out.println(date);
-        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEDDING.getNumber());
+        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEEDING.getNumber());
     }
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
