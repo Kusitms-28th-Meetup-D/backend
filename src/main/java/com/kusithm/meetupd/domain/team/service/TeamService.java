@@ -33,9 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -156,7 +153,8 @@ public class TeamService {
     }
 
     private User findTeamLeader(Long teamId) {
-        return findTeamUserByRoleAndTeamId(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst().orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        return findTeamUserByRoleAndTeamId(TEAM_LEADER.getCode(), teamId).stream().map(TeamUser::getUser).findFirst()
+                .orElseThrow(() -> new ForbiddenException(USER_NOT_TEAMLEADER));
     }
 
     public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
@@ -193,14 +191,28 @@ public class TeamService {
 
     }
 
-    public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) {
+    public void changeRole(Long userId, RequestChangeRoleDto requestChangeRoleDto) throws MessagingException, UnsupportedEncodingException {
         Long teamLeaderId = findTeamLeader(requestChangeRoleDto.getTeamId()).getId();
         Long memberId = requestChangeRoleDto.getMemberId();
         if (userId.equals(teamLeaderId)) { //팀장이라면 권한 수정
             TeamUser teamUser = findTeamUserByUserIdAndTeamId(memberId, requestChangeRoleDto.getTeamId()).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+            validateTeamProgressRecruiting(teamUser.getTeam());
+            validateUserRoleIsVolunteer(teamUser);
             teamUser.setRole(requestChangeRoleDto.getRole());
         } else throw new ConflictException(USER_NOT_HAVE_AUTHORITY);
+        if(requestChangeRoleDto.getRole().equals(TEAM_MEMBER.getCode())) {
+            Team team = findTeamById(requestChangeRoleDto.getTeamId());
+            User user = findUserById(memberId);
+            Contest contest = findContest(team.getContestId());
+            emailService.sendJoinTeamEmail(user.getEmail(), contest.getTitle(), team.getChatLink());
+            List<TeamUser> teamMembers = findTeamUserByTeamIdAndRole(requestChangeRoleDto.getTeamId(), TEAM_MEMBER.getCode());
+            if(teamMembers.size() == team.getHeadCount()) {
+                team.updateProgress(RECRUITMENT_COMPLETED);
+                contestTeamCountDecrease(team);
+            }
+        }
     }
+
 
     public void deleteTeam(Long userId, Long teamId) {
         TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
@@ -219,7 +231,9 @@ public class TeamService {
             throw new ForbiddenException(USER_NOT_TEAMLEADER);
         }
         Team team = findTeamById(teamId);
+        validateTeamProgressRecruiting(team);
         team.updateProgress(RECRUITMENT_COMPLETED);
+        contestTeamCountDecrease(team);
     }
 
     public void cancelApplyTeam(Long userId, Long teamId) {
@@ -349,7 +363,7 @@ public class TeamService {
 
     private List<Team> getReviewDateAfterTeam(Date date) {
         System.out.println(date);
-        return teamRepository.findAllByReviewDateLessThanAndProgress(date, 3);
+        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEDDING.getNumber());
     }
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
@@ -385,6 +399,13 @@ public class TeamService {
         return new Query(Criteria.where("_id").is(new ObjectId(contestId)));
     }
 
+    private void contestTeamCountDecrease(Team team) {
+        Query query = createFindContestByIdQuery(team.getContestId());
+        Update update = new Update();
+        decreaseContestRecruitTeamNumberInUpdate(update);
+        mongoTemplate.updateMulti(query, update, Contest.class);
+    }
+
     private void increaseContestRecruitTeamNumberInUpdate(Update update) {
         update.inc("team_num", 1);
     }
@@ -401,5 +422,17 @@ public class TeamService {
         cal.set(Calendar.SECOND, 59);
         cal.set(Calendar.MILLISECOND, 999);
         return cal.getTime();
+    }
+
+    private void validateUserRoleIsVolunteer(TeamUser teamUser) {
+        if(!teamUser.getRole().equals(VOLUNTEER.getCode())) {
+            throw new ForbiddenException(USER_ROLE_NOT_CHANGE);
+        }
+    }
+
+    private void validateTeamProgressRecruiting(Team team) {
+        if (!team.getProgress().equals(RECRUITING.getNumber())) {
+            throw new ForbiddenException(TEAM_PROGRESS_NOT_RECRUITING);
+        }
     }
 }

@@ -29,6 +29,8 @@ public enum ErrorCode {
     USER_NOT_HAVE_ENOUGH_TICKET(HttpStatus.FORBIDDEN, "보유한 티켓의 수가 부족합니다. 티켓을 충전해주세요."),
     USER_NOT_TEAMLEADER(HttpStatus.FORBIDDEN, "해당 명령을 실행할 수 없습니다. 팀 리더가 아닙니다."),
     USER_NOT_APPLY_STATUS(HttpStatus.FORBIDDEN, "팀에 지원 취소를 할 수 없습니다. 유저가 지원자 상태가 아닙니다."),
+    USER_ROLE_NOT_CHANGE(HttpStatus.FORBIDDEN, "해당 팀원의 역할을 변경할 수 없습니다. 해당 유저가 지원자 상태가 아닙니다."),
+    TEAM_PROGRESS_NOT_RECRUITING(HttpStatus.FORBIDDEN, "해당 팀이 모집 중 상태가 아닙니다."),
 
 
     /**

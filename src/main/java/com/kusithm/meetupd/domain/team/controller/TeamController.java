@@ -11,6 +11,7 @@ import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.service.TeamService;
 import feign.Response;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
@@ -70,7 +72,7 @@ public class TeamController {
 
     //팀원 상태 변경(지원자 -> 합격 / 반려)
     @PatchMapping("/change-role")
-    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody RequestChangeRoleDto requestChangeRoleDto) {
+    public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody RequestChangeRoleDto requestChangeRoleDto) throws MessagingException, UnsupportedEncodingException {
         teamService.changeRole(userId, requestChangeRoleDto);
         return SuccessResponse.of(SuccessCode.OK);
     }
