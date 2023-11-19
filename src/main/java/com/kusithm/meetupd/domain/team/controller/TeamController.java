@@ -106,7 +106,6 @@ public class TeamController {
     //내가 지원한 팀
     @GetMapping("/applied-team")
     public ResponseEntity<SuccessResponse<List<TeamIappliedResponseDto>>> findTeamIApplied(@UserId Long userId) {
-        System.out.println("userId : "+userId);
         List<TeamIappliedResponseDto> response = teamService.appliedTeam(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
