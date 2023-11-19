@@ -363,7 +363,7 @@ public class TeamService {
 
     private List<Team> getReviewDateAfterTeam(Date date) {
         System.out.println(date);
-        return teamRepository.findAllByReviewDateLessThanAndProgress(date, 3);
+        return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEDDING.getNumber());
     }
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
