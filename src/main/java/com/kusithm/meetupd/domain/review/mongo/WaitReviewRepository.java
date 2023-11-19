@@ -9,4 +9,5 @@ public interface WaitReviewRepository extends MongoRepository<WaitReview, String
 
     List<WaitReview> findAllByUserIdAndTeamId(Long userId, Long teamId);
 
+    Boolean existsByUserId(Long userId);
 }
