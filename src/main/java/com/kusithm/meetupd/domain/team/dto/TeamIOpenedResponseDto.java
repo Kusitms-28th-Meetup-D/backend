@@ -22,9 +22,9 @@ public class TeamIOpenedResponseDto {
     private String contestTitle;
     private List<String> contestImage;
 
-    public static TeamIOpenedResponseDto of(Long teamId, List<User> teamMemberInfos, List<User> applyMemberInfos, Contest contest) {
+    public static TeamIOpenedResponseDto of(Team team, List<User> teamMemberInfos, List<User> applyMemberInfos, Contest contest) {
         return TeamIOpenedResponseDto.builder()
-                .teamId(teamId)
+                .teamId(team.getId())
                 .teamMemberSize(teamMemberInfos.size())
                 .applyMemberSize(applyMemberInfos.size())
                 .teamMemberInfos(teamMemberInfos.stream().map(user -> new ResponseTeamMemeberDto(user)).collect(Collectors.toList()))

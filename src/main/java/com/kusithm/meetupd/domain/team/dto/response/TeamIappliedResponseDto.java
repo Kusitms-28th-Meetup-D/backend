@@ -31,7 +31,7 @@ public class TeamIappliedResponseDto {
     public String endDate;//활동 종료 예정일
 
 
-    public static TeamIappliedResponseDto of(Contest contest, User leader, Team team, Integer status) {
+    public static TeamIappliedResponseDto of(Team team, Contest contest, User leader, Integer status) {
 
 
         String userRole = TeamUserRoleType.ofCode(status).getValue();
