@@ -53,6 +53,17 @@ public class ContestService {
         Contest findContest = getContestById(contestId);
         return GetContestDetailInfoResponseDto.of(findContest, LocalDate.now());
     }
+
+    public List<Contest> findRecruitEndContests() {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(1);
+        return findTodayRecruitEndContestsByDate(startDate, endDate);
+    }
+
+    private List<Contest> findTodayRecruitEndContestsByDate(LocalDate startDate, LocalDate endDate) {
+        return contestRepository.findAllEndContestsToday(startDate, endDate);
+    }
+
     private List<Contest> getContestsBySearchText(String searchText) {
         MongoDatabase database = mongoClient.getDatabase("wanteam-db");
         MongoCollection<Document> collection = database.getCollection("contest");

@@ -15,7 +15,7 @@ public enum TeamProgressType {
 
     RECRUITING(1,"모집중"),
     RECRUITMENT_COMPLETED(2,"모집완료"),
-    PROCEDDING(3,"진행중"),
+    PROCEEDING(3,"진행중"),
     PROGRESS_ENDED(4,"진행종료");
 
     private final Integer number;
