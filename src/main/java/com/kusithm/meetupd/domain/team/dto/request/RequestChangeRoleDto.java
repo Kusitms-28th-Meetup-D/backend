@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class RequestChangeRoleDto {
-    public Long teamId;
-    public Long memberId;
-    public Integer role;
+    private Long teamId;
+    private Long memberId;
+    private Integer role;
 }

@@ -27,8 +27,8 @@ public class EmailService {
     }
 
     @Async
-    public void sendJoinTeamEmail(String toEmail, String teamName) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage emailForm = createJoinTeamEmailForm(toEmail, teamName);
+    public void sendJoinTeamEmail(String toEmail, String teamName, String kakaoUrl) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage emailForm = createJoinTeamEmailForm(toEmail, teamName, kakaoUrl);
         emailSender.send(emailForm);
     }
 
@@ -56,20 +56,21 @@ public class EmailService {
     }
 
 
-    private MimeMessage createJoinTeamEmailForm(String toEmail, String teamName) throws MessagingException, UnsupportedEncodingException {
+    private MimeMessage createJoinTeamEmailForm(String toEmail, String teamName, String kakaoUrl) throws MessagingException, UnsupportedEncodingException {
         String setFrom = "ojy09293@gmail.com";
         String title = "[Wanteam] 팀 합류 안내 메일";
         MimeMessage message = emailSender.createMimeMessage();
         message.addRecipients(MimeMessage.RecipientType.TO, toEmail);
         message.setSubject(title);
         message.setFrom(new InternetAddress(setFrom, "Wanteam", "UTF-8"));
-        message.setText(setContextJoinTeamMail(teamName), "utf-8", "html");
+        message.setText(setContextJoinTeamMail(teamName, kakaoUrl), "utf-8", "html");
         return message;
     }
 
-    private String setContextJoinTeamMail(String teamName) {
+    private String setContextJoinTeamMail(String teamName, String kakaoUrl) {
         Context context = new Context();
         context.setVariable("teamName", teamName);
+        context.setVariable("kakaoUrl", kakaoUrl);
         return templateEngine.process("join-team-mail", context);
     }
 
@@ -90,6 +91,4 @@ public class EmailService {
         context.setVariable("teamName", teamName);
         return templateEngine.process("team-review-date-end-mail", context);
     }
-
-
 }
