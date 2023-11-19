@@ -3,6 +3,7 @@ package com.kusithm.meetupd.domain.team.dto.request;
 
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.team.dto.response.ResponseTeamMemeberDto;
+import com.kusithm.meetupd.domain.team.dto.response.TeamIappliedResponseDto;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.user.entity.LocationType;
 import com.kusithm.meetupd.domain.user.entity.User;
@@ -34,9 +35,6 @@ public class TeamProceedResponseDto {
 
     public static TeamProceedResponseDto of(Team team, Contest contest, User leaderInfo, List<User> teamMemberInfos) {
 
-        DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDate = sdFormat.format(team.getReviewDate());
-
         return TeamProceedResponseDto.builder()
                 .contestId(contest.getId())
                 .contestTitle(contest.getTitle())
@@ -45,7 +43,7 @@ public class TeamProceedResponseDto {
                 .leaderMessage(team.getLeaderMessage())
                 .memberSize(team.getTeamUsers().size())
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
-                .endDate(formattedDate)
+                .endDate(TeamIappliedResponseDto.formatDate(team.getReviewDate()))
                 .notice(team.getNotice())
                 .teamMemberInfos(teamMemberInfos.stream().map(ResponseTeamMemeberDto::new).collect(Collectors.toList()))
                 .chatLink(team.getChatLink())

@@ -62,8 +62,6 @@ public class TeamController {
         teamService.openTeam(userId, teamDto);
         return SuccessResponse.of(SuccessCode.TEAM_CREATED);
     }
-
-    //팀 합류 신청
     @PostMapping("/apply")
     public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody ApplyTeamRequestDto dto) {
         teamService.applyTeam(userId, dto.getTeamId());
@@ -108,6 +106,7 @@ public class TeamController {
     //내가 지원한 팀
     @GetMapping("/applied-team")
     public ResponseEntity<SuccessResponse<List<TeamIappliedResponseDto>>> findTeamIApplied(@UserId Long userId) {
+        System.out.println("userId : "+userId);
         List<TeamIappliedResponseDto> response = teamService.appliedTeam(userId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
@@ -120,7 +119,7 @@ public class TeamController {
     }
 
     //활동했던 팀
-    @GetMapping("/")
+    @GetMapping("/worked-team")
     public ResponseEntity<SuccessResponse<List<TeamIWorkedResponseDto>>> findTeamIWorked(@UserId Long userId) {
         List<TeamIWorkedResponseDto> response = teamService.workedTeam(userId);
         return SuccessResponse.of(SuccessCode.OK, response);

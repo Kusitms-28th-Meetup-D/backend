@@ -74,7 +74,7 @@ public class AuthService {
         User findUser = getUserByKakaoId(kakaoId.getId());
 
         Token token = generateToken(findUser.getId());
-        saveRefreshToken(findUser.getId(), token.getRefreshToken());
+//        saveRefreshToken(findUser.getId(), token.getRefreshToken());
 
         return KakaoLoginResponseDto.of(findUser, request.getRedirectUrl(), token.getRefreshToken(), token.getAccessToken() );
     }
