@@ -22,6 +22,8 @@ public class GetContestDetailInfoResponseDto {
 
     private String title;
 
+    private Double averageComments;
+
     private List<String> images;
 
     private Long remainDay;
@@ -40,7 +42,7 @@ public class GetContestDetailInfoResponseDto {
 
     private String price;
 
-    public static GetContestDetailInfoResponseDto of(Contest contest, LocalDate nowDate) {
+    public static GetContestDetailInfoResponseDto of(Contest contest, LocalDate nowDate, Double averageComments) {
         String recruitDate = "[접수기간]" + contest.getRecruitmentStartDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
                 + "(" + contest.getRecruitmentStartDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN) + ") ~ "
                 + contest.getRecruitmentEndDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
@@ -49,6 +51,7 @@ public class GetContestDetailInfoResponseDto {
         return GetContestDetailInfoResponseDto.builder()
                 .contestId(contest.getId())
                 .title(contest.getTitle())
+                .averageComments(averageComments)
                 .images(contest.getContestImages())
                 .remainDay(DAYS.between(nowDate, contest.getRecruitmentEndDate()))
                 .description(contest.getDesc())
