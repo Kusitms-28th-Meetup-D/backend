@@ -10,6 +10,7 @@ import com.kusithm.meetupd.domain.team.dto.request.*;
 import com.kusithm.meetupd.domain.team.dto.response.*;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.service.TeamService;
+import com.kusithm.meetupd.domain.user.dto.response.ReviewPageUserResponseDto;
 import feign.Response;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -123,6 +124,13 @@ public class TeamController {
     @GetMapping("/worked-team")
     public ResponseEntity<SuccessResponse<List<TeamIWorkedResponseDto>>> findTeamIWorked(@UserId Long userId) {
         List<TeamIWorkedResponseDto> response = teamService.workedTeam(userId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    //추천사 페이지 유저파트
+    @GetMapping("/review/{teamId}")
+    public ResponseEntity<SuccessResponse<ReviewPageUserResponseDto>> getReviewPageUser(@UserId Long userId, @PathVariable Long teamId) {
+        ReviewPageUserResponseDto response = teamService.getReviewPageUser(userId,teamId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 }
