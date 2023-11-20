@@ -133,4 +133,11 @@ public class TeamController {
         ReviewPageUserResponseDto response = teamService.getReviewPageUser(userId,teamId);
         return SuccessResponse.of(SuccessCode.OK, response);
     }
+
+    //팀 관리하기
+    @GetMapping("/manage/{teamId}")
+    public ResponseEntity<SuccessResponse<TeamManageResponseDto>> manageTeam(@UserId Long userId, @PathVariable Long teamId) {
+        TeamManageResponseDto response = teamService.manageTeam(userId,teamId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
 }
