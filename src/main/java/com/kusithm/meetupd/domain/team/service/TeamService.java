@@ -256,7 +256,7 @@ public class TeamService {
         for (TeamUser teamUser : teamUsersIOpened) {
             Team team = findTeamUserByTeam(teamUser);
             Long teamId = team.getId();
-            if (compareTeamProgress(team, RECRUITING.getNumber())) {
+            if (isTeamEqualsProgress(team, RECRUITING.getNumber())) {
                 List<TeamUser> teamMember = findTeamUserByTeamIdAndRole(teamId, TEAM_MEMBER.getCode());
                 List<TeamUser> applyMember = findTeamUserByTeamIdAndRole(teamId, VOLUNTEER.getCode());
                 dtos.add(TeamIOpenedResponseDto.of(team, findUserThroughTeamUser(teamMember), findUserThroughTeamUser(applyMember), findContest(team.getContestId())));
@@ -270,7 +270,7 @@ public class TeamService {
         List<TeamUser> appliedReamUsers = findTeamUserIApplied(userId, TEAM_MEMBER.getCode());
         for (TeamUser teamUser : appliedReamUsers) {
             Team team = findTeamUserByTeam(teamUser);
-            if (team.getProgress().equals(RECRUITING.getNumber())) {
+            if (isTeamEqualsProgress(team,RECRUITING.getNumber())) {
                 dtos.add(TeamIappliedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(team.getId()), teamUser.getRole()));
             }
         }
@@ -282,7 +282,7 @@ public class TeamService {
         List<TeamUser> teamUserProceed = findTeamMemberAndTeamUser(userId);
         for (TeamUser teamUser : teamUserProceed) {
             Team team = findTeamUserByTeam(teamUser);
-            if (team.getProgress().equals(PROCEEDING.getNumber())) {
+            if (isTeamEqualsProgress(team,PROCEEDING.getNumber())) {
                 Long teamId = team.getId();
                 dtos.add(TeamProceedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId)));
             }
@@ -295,12 +295,16 @@ public class TeamService {
         List<TeamUser> teamMemberAndTeamUser = findTeamMemberAndTeamUser(userId);
         for (TeamUser teamUser : teamMemberAndTeamUser) {
             Team team = findTeamUserByTeam(teamUser);
-            if (team.getProgress().equals(PROGRESS_ENDED.getNumber())) {
+            if (isTeamEqualsProgress(team,PROGRESS_ENDED.getNumber())) {
                 Long teamId = team.getId();
                 dtos.add(TeamIWorkedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId), checkUserReviewThisTeam(userId, teamId)));
             }
         }
         return dtos;
+    }
+
+    private boolean isTeamEqualsProgress(Team team,Integer progressType) {
+        return team.getProgress().equals(progressType);
     }
 
     private List<TeamUser> findTeamMemberAndTeamUser(Long userId) {
@@ -386,10 +390,6 @@ public class TeamService {
 
     private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {
         return teamUserRepository.findAllByTeamIdAndRole(teamId, role);
-    }
-
-    private boolean compareTeamProgress(Team team, Integer teamProgress) {
-        return team.getProgress().equals(teamProgress);
     }
 
     private List<Team> findTeamByProgress(Integer progress) {
