@@ -18,6 +18,8 @@ import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
 import com.kusithm.meetupd.domain.team.mysql.TeamUserRepository;
+import com.kusithm.meetupd.domain.user.dto.response.ReviewPageUserResponseDto;
+import com.kusithm.meetupd.domain.user.dto.response.UserReviewResponseDto;
 import com.kusithm.meetupd.domain.user.entity.User;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import jakarta.mail.MessagingException;
@@ -270,7 +272,7 @@ public class TeamService {
         List<TeamUser> appliedReamUsers = findTeamUserIApplied(userId, TEAM_MEMBER.getCode());
         for (TeamUser teamUser : appliedReamUsers) {
             Team team = findTeamUserByTeam(teamUser);
-            if (isTeamEqualsProgress(team,RECRUITING.getNumber())) {
+            if (isTeamEqualsProgress(team, RECRUITING.getNumber())) {
                 dtos.add(TeamIappliedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(team.getId()), teamUser.getRole()));
             }
         }
@@ -282,7 +284,7 @@ public class TeamService {
         List<TeamUser> teamUserProceed = findTeamMemberAndTeamUser(userId);
         for (TeamUser teamUser : teamUserProceed) {
             Team team = findTeamUserByTeam(teamUser);
-            if (isTeamEqualsProgress(team,PROCEEDING.getNumber())) {
+            if (isTeamEqualsProgress(team, PROCEEDING.getNumber())) {
                 Long teamId = team.getId();
                 dtos.add(TeamProceedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId)));
             }
@@ -295,7 +297,7 @@ public class TeamService {
         List<TeamUser> teamMemberAndTeamUser = findTeamMemberAndTeamUser(userId);
         for (TeamUser teamUser : teamMemberAndTeamUser) {
             Team team = findTeamUserByTeam(teamUser);
-            if (isTeamEqualsProgress(team,PROGRESS_ENDED.getNumber())) {
+            if (isTeamEqualsProgress(team, PROGRESS_ENDED.getNumber())) {
                 Long teamId = team.getId();
                 dtos.add(TeamIWorkedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(teamId), findTeamMember(teamId), checkUserReviewThisTeam(userId, teamId)));
             }
@@ -303,7 +305,7 @@ public class TeamService {
         return dtos;
     }
 
-    private boolean isTeamEqualsProgress(Team team,Integer progressType) {
+    private boolean isTeamEqualsProgress(Team team, Integer progressType) {
         return team.getProgress().equals(progressType);
     }
 
@@ -448,5 +450,20 @@ public class TeamService {
 
     private Boolean checkUserReviewThisTeam(Long userId, Long teamId) {
         return userReviewedTeamRepository.existsByUserIdAndTeamId(userId, teamId);
+    }
+
+    public ReviewPageUserResponseDto getReviewPageUser(Long userId, Long teamId) {
+        List<TeamUser> teamUsersExceptMe = findTeamUsersByTeamIdExceptMe(teamId, TEAM_MEMBER.getCode(), userId);
+
+        List<UserReviewResponseDto> userReviewInfo = teamUsersExceptMe.stream()
+                .map(teamUser -> UserReviewResponseDto.of(teamUser.getUser()))
+                .sorted(Comparator.comparing(UserReviewResponseDto::getTeamMemberName))
+                .collect(Collectors.toList());
+
+        return ReviewPageUserResponseDto.of(teamId, userReviewInfo);
+    }
+
+    private List<TeamUser> findTeamUsersByTeamIdExceptMe(Long teamId, Integer role, Long userId) {
+        return teamUserRepository.findAllByTeamIdAndRoleLessThanEqualAndUserIdNot(teamId, role, userId);
     }
 }
