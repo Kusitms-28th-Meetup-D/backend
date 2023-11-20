@@ -15,4 +15,5 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findAllByContestIdAndProgress(String contestId, Integer teamProgress);
     Optional<List<Team>> findAllByIdAndProgress(Long userId, Integer progress);
     List<Team> findAllByReviewDateLessThanAndProgress(Date date, Integer Progress);
+    List<Team> findAllByContestIdAndProgressLessThanEqual(String contestId, Integer teamProgress);
 }

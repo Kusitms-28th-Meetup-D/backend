@@ -8,6 +8,13 @@ import com.kusithm.meetupd.domain.contest.dto.response.GetContestDetailInfoRespo
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.entity.ContestType;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
+import com.kusithm.meetupd.domain.review.entity.Review;
+import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
+import com.kusithm.meetupd.domain.team.entity.Team;
+import com.kusithm.meetupd.domain.team.entity.TeamUser;
+import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
+import com.kusithm.meetupd.domain.team.mysql.TeamUserRepository;
+import com.kusithm.meetupd.domain.user.entity.User;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -22,14 +29,20 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static com.kusithm.meetupd.common.error.ErrorCode.USER_REVIEW_NOT_FOUND;
 import static com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto.createListOf;
+import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITMENT_COMPLETED;
 
 @RequiredArgsConstructor
 @Service
 public class ContestService {
 
     private final ContestRepository contestRepository;
+    private final ReviewRepository reviewRepository;
+    private final TeamRepository teamRepository;
+    private final TeamUserRepository teamUserRepository;
     private final MongoConverter mongoConverter;
     private final MongoClient mongoClient;
 
@@ -51,7 +64,37 @@ public class ContestService {
 
     public GetContestDetailInfoResponseDto getContestDetailById(String contestId) {
         Contest findContest = getContestById(contestId);
-        return GetContestDetailInfoResponseDto.of(findContest, LocalDate.now());
+        List<Team> teams = findAllRecuritTeamByContestTitle(contestId);
+        Double averageContestUserComments = 0.0;
+        for (Team team : teams) {
+            averageContestUserComments += getTeamAverageCommentsCount(team);
+        }
+        averageContestUserComments /= teams.size();
+        return GetContestDetailInfoResponseDto.of(findContest, LocalDate.now(),  Math.floor(averageContestUserComments * 10) / 10);
+    }
+
+    private List<Team> findAllRecuritTeamByContestTitle(String contestId) {
+        return teamRepository.findAllByContestIdAndProgressLessThanEqual(contestId, RECRUITMENT_COMPLETED.getNumber());
+    }
+
+    private Double getTeamAverageCommentsCount(Team team) {
+        Double averageTeamUserComments = 0.0;
+        List<TeamUser> teamUsers = team.getTeamUsers();
+        for (TeamUser teamUser : teamUsers) {
+            averageTeamUserComments += getTeamUserCommentCount(teamUser);
+        }
+        return averageTeamUserComments / teamUsers.size();
+    }
+
+    private Integer getTeamUserCommentCount(TeamUser teamUser) {
+        User user = teamUser.getUser();
+        Review review = findReviewByUserId(user);
+        return review.getReviewComments().size();
+    }
+
+    private Review findReviewByUserId(User user) {
+        return reviewRepository.findByUserId(user.getId())
+                .orElseThrow(()-> new EntityNotFoundException(USER_REVIEW_NOT_FOUND));
     }
 
     public List<Contest> findRecruitEndContests() {

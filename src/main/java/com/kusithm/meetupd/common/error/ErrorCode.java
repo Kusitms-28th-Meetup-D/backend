@@ -43,7 +43,7 @@ public enum ErrorCode {
     ENUM_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 ENUM TYPE을 찾을 수 없습니다."),
 
     CONTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 공모전을 찾을 수 없습니다."),
-    USER_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 유저의 추천사를 찾을 수 없습니다."),
+    USER_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 유저의 리뷰를 찾을 수 없습니다."),
 
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신 팀을 찾을 수 없습니다."),
     TEAM_USER_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신 팀원을 찾을 수 없습니다."),

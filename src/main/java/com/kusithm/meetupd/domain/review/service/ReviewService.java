@@ -108,7 +108,7 @@ public class ReviewService {
 
     private Review getReviewByUserId(Long userId) {
         return reviewRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(USER_RECOMMENDATION_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(USER_REVIEW_NOT_FOUND));
     }
 
     private static List<WaitReview> makeWaitReviewListFromUploadRequest(UploadReviewRequestDto request) {
