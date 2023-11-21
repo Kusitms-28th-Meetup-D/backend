@@ -293,7 +293,7 @@ public class TeamService {
         for (TeamUser teamUser : appliedReamUsers) {
             Team team = findTeamUserByTeam(teamUser);
             if (isTeamEqualsProgress(team, RECRUITING.getNumber())) {
-                dtos.add(TeamIappliedResponseDto.of(team, findContest(team.getContestId()), findTeamLeader(team.getId()), teamUser.getRole()));
+                dtos.add(TeamIappliedResponseDto.of(team, findTeamMember(userId).size(), findContest(team.getContestId()), findTeamLeader(team.getId()), teamUser.getRole()));
             }
         }
         return dtos;

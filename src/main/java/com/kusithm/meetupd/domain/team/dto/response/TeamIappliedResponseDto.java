@@ -31,10 +31,8 @@ public class TeamIappliedResponseDto {
     public String endDate;//활동 종료 예정일
 
 
-    public static TeamIappliedResponseDto of(Team team, Contest contest, User leader, Integer status) {
+    public static TeamIappliedResponseDto of(Team team, int teamMemberSize,Contest contest, User leader, Integer status) {
 
-
-        String userRole = TeamUserRoleType.ofCode(status).getValue();
         return TeamIappliedResponseDto.builder()
                 .contestId(contest.getId())
                 .contestTitle(contest.getTitle())
@@ -44,14 +42,14 @@ public class TeamIappliedResponseDto {
                 .status(manufactureStatus(status))
                 .leaderMessage(team.getLeaderMessage())
                 .max(team.getHeadCount())
-                .cur(team.getTeamUsers().size())
+                .cur(teamMemberSize)
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
                 .endDate(formatDate(team.getReviewDate()))
                 .build();
 
     }
 
-    public static String formatDate(Date date){
+    public static String formatDate(Date date) {
         DateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
         return sdFormat.format(date);
     }
