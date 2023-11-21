@@ -82,7 +82,7 @@ public class TeamService {
         for (Team teams : teamByContentIdAndProgress) {
             User leader = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_LEADER.getCode())).map(TeamUser::getUser).findFirst().get();
 
-            List<User> member = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_MEMBER.getCode())).map(TeamUser::getUser).collect(Collectors.toList());
+            List<User> member = teams.getTeamUsers().stream().filter(v -> v.getRole().equals(TEAM_MEMBER.getCode())).map(TeamUser::getUser).sorted(Comparator.comparing(User::getUpdatedDate).reversed()).collect(Collectors.toList());
 
             dto.add(RecruitingContestTeamResponseDto.of(teams, leader, member));
         }
@@ -159,7 +159,7 @@ public class TeamService {
     }
 
     private List<User> findTeamMember(Long teamId) {
-        return findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId).stream().map(TeamUser::getUser).collect(Collectors.toList());
+        return findTeamUserByRoleAndTeamId(TEAM_MEMBER.getCode(), teamId).stream().map(TeamUser::getUser).sorted(Comparator.comparing(User::getUpdatedDate).reversed()).collect(Collectors.toList());
     }
 
     private User findTeamLeader(Long teamId) {
@@ -168,7 +168,9 @@ public class TeamService {
     }
 
     public List<Team> findTeamByContentIdAndProgress(String contestId, Integer teamProgress) {
-        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress);
+        return teamRepository.findAllByContestIdAndProgress(contestId, teamProgress).stream()
+                .sorted(Comparator.comparing(Team::getCreatedDate).reversed())
+                .toList();
     }
 
     private List<TeamUser> findTeamUserByRoleAndTeamId(Integer role, Long teamId) {
@@ -261,7 +263,7 @@ public class TeamService {
     public List<TeamIOpenedResponseDto> findTeamIOpen(Long userId) {
         List<TeamIOpenedResponseDto> dtos = new ArrayList<>();
         Integer role = TEAM_LEADER.getCode();
-        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, role);//내가 오픈한 팀을 찾고
+        List<TeamUser> teamUsersIOpened = findTeamUserByUserIdAndRole(userId, role);
         for (TeamUser teamUser : teamUsersIOpened) {
             Team team = findTeamUserByTeam(teamUser);
             Long teamId = team.getId();
@@ -328,7 +330,9 @@ public class TeamService {
     }
 
     private List<TeamUser> findTeamMemberAndTeamUser(Long userId) {
-        return findTeamUserLessThan(userId, TEAM_MEMBER.getCode());
+        return findTeamUserLessThan(userId, TEAM_MEMBER.getCode()).stream()
+                .sorted(Comparator.comparing(teamUser -> teamUser.getTeam().getUpdatedDate(), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 
     private Team findTeamUserByTeam(TeamUser teamUser) {
@@ -397,7 +401,9 @@ public class TeamService {
     }
 
     private List<TeamUser> findTeamUserIApplied(Long userId, Integer role) {
-        return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role); //>=
+        return teamUserRepository.findAllByUserIdAndRoleGreaterThanEqual(userId, role).stream()
+                .sorted(Comparator.comparing(teamUser -> teamUser.getTeam().getUpdatedDate(), Comparator.reverseOrder()))
+                .collect(Collectors.toList()); //>=
     }
 
     private List<TeamUser> findTeamUserLessThan(Long userId, Integer role) {
@@ -405,7 +411,9 @@ public class TeamService {
     }
 
     private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {
-        return teamUserRepository.findAllByTeamIdAndRole(teamId, role);
+        return teamUserRepository.findAllByTeamIdAndRole(teamId, role).stream()
+                .sorted(Comparator.comparing(TeamUser::getUpdatedDate).reversed())
+                .toList();
     }
 
     public List<User> findUserThroughTeamUser(List<TeamUser> teamUsers) {
@@ -413,7 +421,9 @@ public class TeamService {
     }
 
     private List<TeamUser> findTeamUserByUserIdAndRole(Long userId, Integer role) {
-        return teamUserRepository.findAllByUserIdAndRole(userId, role);
+        return teamUserRepository.findAllByUserIdAndRole(userId, role).stream()
+                .sorted(Comparator.comparing(teamUser -> teamUser.getTeam().getUpdatedDate(), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 
 
