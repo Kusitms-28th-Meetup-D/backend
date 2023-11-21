@@ -23,7 +23,7 @@ public class RecruitingContestTeamResponseDto {
 
     public static RecruitingContestTeamResponseDto of(Team team, User leader, List<User> teamMemeberInfos) {
         int max = team.getHeadCount();
-        int cur = team.getTeamUsers().size();
+        int cur = teamMemeberInfos.size();
         return RecruitingContestTeamResponseDto.builder()
                 .teamId(team.getId())
                 .max(max)

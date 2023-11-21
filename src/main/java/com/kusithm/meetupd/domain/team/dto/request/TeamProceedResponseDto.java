@@ -41,7 +41,7 @@ public class TeamProceedResponseDto {
                 .contestImage(contest.getContestImages())
                 .leaderInfo(new ResponseTeamMemeberDto(leaderInfo))
                 .leaderMessage(team.getLeaderMessage())
-                .memberSize(team.getTeamUsers().size())
+                .memberSize(teamMemberInfos.size())
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
                 .endDate(TeamIappliedResponseDto.formatDate(team.getReviewDate()))
                 .notice(team.getNotice())

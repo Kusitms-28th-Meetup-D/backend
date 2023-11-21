@@ -35,7 +35,7 @@ public class TeamDetailResponseDto {
         String formattedDate = sdFormat.format(team.getReviewDate());
 
         int max = team.getHeadCount();
-        int cur = team.getTeamUsers().size();
+        int cur = teamMemeberInfos.size();
         return TeamDetailResponseDto.builder()
                 .leaderInfo(new ResponseTeamMemeberDto(leader))
                 .leaderMessage(team.getLeaderMessage())
