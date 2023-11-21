@@ -176,7 +176,7 @@ public class TeamService {
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
-        verifyCanOpenTeam(TEAM_LEADER.getCode(), userId);
+        verifyCanOpenTeam(TEAM_LEADER.getCode(), userId, teamDto.getContestId());
         User user = findUserById(userId);
         Team team = saveTeam(teamDto);
         team.getLocation().changeTeam(team);
@@ -187,9 +187,12 @@ public class TeamService {
         mongoTemplate.updateMulti(query, update, Contest.class);
     }
 
-    private void verifyCanOpenTeam(Integer role, Long userId) {
-        if (teamUserRepository.existsByRoleAndUserId(role, userId))
-            throw new ConflictException(ALREADY_USER_OPEN_TEAM);
+    private void verifyCanOpenTeam(Integer role, Long userId, String contestId) {
+        List<TeamUser> teamUsers = teamUserRepository.findAllByUserIdAndRole(userId, role);
+        for (TeamUser teamUser : teamUsers) {
+            if (teamUser.getTeam().getContestId().equals(contestId))
+                throw new ConflictException(ALREADY_USER_OPEN_TEAM);
+        }
     }
 
     public void applyTeam(Long userId, Long teamId) {
