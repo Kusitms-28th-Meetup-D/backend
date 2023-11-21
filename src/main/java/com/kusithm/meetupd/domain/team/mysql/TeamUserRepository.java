@@ -29,4 +29,6 @@ public interface TeamUserRepository extends JpaRepository<TeamUser, Long> {
     List<TeamUser> findAllByTeamIdAndRoleLessThanEqual(Long teamId, Integer role);
 
     List<TeamUser> findAllByTeamIdAndRoleLessThanEqualAndUserIdNot(Long teamId, Integer role, Long userId);
+
+    List<TeamUser> findAllByUserId(Long userId);
 }
