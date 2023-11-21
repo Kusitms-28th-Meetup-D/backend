@@ -267,6 +267,17 @@ public class TeamService {
         return dtos;
     }
 
+    public TeamManageResponseDto manageTeam(Long userId, Long teamId) {
+        TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
+        if (!teamUser.getRole().equals(TEAM_LEADER.getCode())) {
+            throw new ForbiddenException(USER_NOT_TEAMLEADER);
+        }
+        List<TeamUser> teamMember = findTeamUserByTeamIdAndRole(teamId, TEAM_MEMBER.getCode());
+        List<TeamUser> applyMember = findTeamUserByTeamIdAndRole(teamId, VOLUNTEER.getCode());
+        return TeamManageResponseDto.of(findUserThroughTeamUser(teamMember), findUserThroughTeamUser(applyMember));
+    }
+
     public List<TeamIappliedResponseDto> appliedTeam(Long userId) {
         List<TeamIappliedResponseDto> dtos = new ArrayList<>();
         List<TeamUser> appliedReamUsers = findTeamUserIApplied(userId, TEAM_MEMBER.getCode());
@@ -320,10 +331,6 @@ public class TeamService {
     private Team findTeamById(Long teamId) {
         return teamRepository.findById(teamId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_NOT_FOUND));
-    }
-
-    private TeamUser findTeamUserById(Long userId) {
-        return teamUserRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
     }
 
     private Optional<TeamUser> findTeamUserByUserIdAndTeamId(Long userId, Long teamId) {
@@ -392,10 +399,6 @@ public class TeamService {
 
     private List<TeamUser> findTeamUserByTeamIdAndRole(Long teamId, Integer role) {
         return teamUserRepository.findAllByTeamIdAndRole(teamId, role);
-    }
-
-    private List<Team> findTeamByProgress(Integer progress) {
-        return teamRepository.findAllByProgress(progress);
     }
 
     public List<User> findUserThroughTeamUser(List<TeamUser> teamUsers) {
