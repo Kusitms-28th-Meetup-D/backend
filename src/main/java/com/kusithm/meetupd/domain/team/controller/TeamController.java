@@ -67,7 +67,7 @@ public class TeamController {
     }
     @PostMapping("/apply")
     public ResponseEntity<SuccessResponse> applyTeam(@UserId Long userId, @RequestBody ApplyTeamRequestDto dto) {
-        teamService.applyTeam(userId, dto.getTeamId());
+        teamService.applyTeam(userId, dto.getTeamId(), dto.getContestId());
         return SuccessResponse.of(SuccessCode.OK);
     }
 
