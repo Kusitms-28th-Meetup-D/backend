@@ -222,7 +222,7 @@ public class TeamService {
             emailService.sendJoinTeamEmail(user.getEmail(), contest.getTitle(), team.getChatLink());
             List<TeamUser> teamMembers = findTeamUserByTeamIdAndRole(requestChangeRoleDto.getTeamId(), TEAM_MEMBER.getCode());
             if (teamMembers.size() == team.getHeadCount()) {
-                team.updateProgress(RECRUITMENT_COMPLETED);
+                team.updateProgress(PROCEEDING);
                 contestTeamCountDecrease(team);
             }
         }
@@ -232,7 +232,7 @@ public class TeamService {
     public void deleteTeam(Long userId, Long teamId) {
         TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
-        if (!teamUser.equals(TEAM_LEADER.getCode())) {
+        if (!teamUser.getRole().equals(TEAM_LEADER.getCode())) {
             throw new ForbiddenException(USER_NOT_TEAMLEADER);
         }
         Team team = findTeamById(teamId);
@@ -242,19 +242,19 @@ public class TeamService {
     public void updateTeamProgressRecruitment(Long userId, Long teamId) {
         TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
-        if (!teamUser.equals(TEAM_LEADER.getCode())) {
+        if (!teamUser.getRole().equals(TEAM_LEADER.getCode())) {
             throw new ForbiddenException(USER_NOT_TEAMLEADER);
         }
         Team team = findTeamById(teamId);
         validateTeamProgressRecruiting(team);
-        team.updateProgress(RECRUITMENT_COMPLETED);
+        team.updateProgress(PROCEEDING);
         contestTeamCountDecrease(team);
     }
 
     public void cancelApplyTeam(Long userId, Long teamId) {
         TeamUser teamUser = findTeamUserByUserIdAndTeamId(userId, teamId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_USER_NOT_FOUND));
-        if (!teamUser.equals(VOLUNTEER.getCode())) {
+        if (!teamUser.getRole().equals(VOLUNTEER.getCode())) {
             throw new ForbiddenException(USER_NOT_APPLY_STATUS);
         }
         teamUserRepository.delete(teamUser);
@@ -396,7 +396,6 @@ public class TeamService {
     }
 
     private List<Team> getReviewDateAfterTeam(Date date) {
-        System.out.println(date);
         return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEEDING.getNumber());
     }
 
