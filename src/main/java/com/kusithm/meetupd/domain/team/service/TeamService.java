@@ -222,7 +222,7 @@ public class TeamService {
             emailService.sendJoinTeamEmail(user.getEmail(), contest.getTitle(), team.getChatLink());
             List<TeamUser> teamMembers = findTeamUserByTeamIdAndRole(requestChangeRoleDto.getTeamId(), TEAM_MEMBER.getCode());
             if (teamMembers.size() == team.getHeadCount()) {
-                team.updateProgress(RECRUITMENT_COMPLETED);
+                team.updateProgress(PROCEEDING);
                 contestTeamCountDecrease(team);
             }
         }
@@ -247,7 +247,7 @@ public class TeamService {
         }
         Team team = findTeamById(teamId);
         validateTeamProgressRecruiting(team);
-        team.updateProgress(RECRUITMENT_COMPLETED);
+        team.updateProgress(PROCEEDING);
         contestTeamCountDecrease(team);
     }
 

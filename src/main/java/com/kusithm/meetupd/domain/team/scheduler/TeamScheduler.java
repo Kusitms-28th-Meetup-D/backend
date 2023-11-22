@@ -32,11 +32,11 @@ public class TeamScheduler {
         teams.forEach(it -> log.info("updated team id - {}", it.getId()));
     }
 
-    // 공모전 모집 일자 마감됐으면 해당 공모전에 팀들 상태 활동중으로 변경하기
-    @Scheduled(cron = "1 0 0 * * *")
-    public void scheduleTaskUpdateTeamProgressProceeding() {
-        List<Contest> todayRecruitEndContests = contestService.findRecruitEndContests();
-        todayRecruitEndContests.forEach(contest -> teamService.updateTeamProgressProceeding(contest.getId()));
-        log.info("updateTeamProgressProceeding schedule tasks - {}", LocalDate.now());
-    }
+    // 공모전 모집 일자 마감됐으면 해당 공모전에 팀들 상태 활동중으로 변경하기 11/22 모집 완료시 바로 활동중으로 팀 상태 변경하기로함
+//    @Scheduled(cron = "1 0 0 * * *")
+//    public void scheduleTaskUpdateTeamProgressProceeding() {
+//        List<Contest> todayRecruitEndContests = contestService.findRecruitEndContests();
+//        todayRecruitEndContests.forEach(contest -> teamService.updateTeamProgressProceeding(contest.getId()));
+//        log.info("updateTeamProgressProceeding schedule tasks - {}", LocalDate.now());
+//    }
 }
