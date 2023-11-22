@@ -5,4 +5,5 @@ import lombok.Getter;
 @Getter
 public class ApplyTeamRequestDto {
     private Long teamId;
+    private String contestId;
 }

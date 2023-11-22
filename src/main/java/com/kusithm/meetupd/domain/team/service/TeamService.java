@@ -178,7 +178,7 @@ public class TeamService {
     }
 
     public void openTeam(Long userId, RequestCreateTeamDto teamDto) {
-        verifyCanOpenTeam(userId, teamDto.getContestId());
+        verifyCanOpenTeamAndCanApplyTeam(userId, teamDto.getContestId());
         User user = findUserById(userId);
         Team team = saveTeam(teamDto);
         team.getLocation().changeTeam(team);
@@ -189,20 +189,20 @@ public class TeamService {
         mongoTemplate.updateMulti(query, update, Contest.class);
     }
 
-    private void verifyCanOpenTeam(Long userId, String contestId) {
+    private void verifyCanOpenTeamAndCanApplyTeam(Long userId, String contestId) {
         List<TeamUser> teamUsers = teamUserRepository.findAllByUserId(userId);
         for (TeamUser teamUser : teamUsers) {
             if (teamUser.getTeam().getContestId().equals(contestId)) {
                 if (teamUser.getRole().equals(TEAM_LEADER.getCode())) //해당 공모전에 오픈한 팀이 있는 경우
                     throw new ConflictException(ALREADY_USER_OPEN_TEAM);
-                else if ((teamUser.getRole().equals(TEAM_MEMBER.getCode()) || teamUser.getRole().equals(VOLUNTEER.getCode())))
+                else if ((teamUser.getRole().equals(TEAM_MEMBER.getCode()) || teamUser.getRole().equals(VOLUNTEER.getCode()))) //해당 공모전의 멤버이거나, 지원한 경우
                     throw new ConflictException(ALREADY_USER_APPLY_CONTEST);
             }
         }
     }
 
-    public void applyTeam(Long userId, Long teamId) {
-        verifyAlreadyApplyThisTeam(userId, teamId);
+    public void applyTeam(Long userId, Long teamId, String contestId) {
+        verifyCanOpenTeamAndCanApplyTeam(userId,contestId);
         saveTeamUser(VOLUNTEER.getCode(), findUserById(userId), findTeamById(teamId));
     }
 
