@@ -41,7 +41,7 @@ public class TeamProceedResponseDto {
                 .contestImage(contest.getContestImages())
                 .leaderInfo(new ResponseTeamMemeberDto(leaderInfo))
                 .leaderMessage(team.getLeaderMessage())
-                .memberSize(teamMemberInfos.size())
+                .memberSize(teamMemberInfos.size()+1) //팀장까지 포함
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
                 .endDate(TeamIappliedResponseDto.formatDate(team.getReviewDate()))
                 .notice(team.getNotice())
