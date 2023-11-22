@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class TeamIWorkedResponseDto {
+    private Long teamId;
     private String contestId;
     private String contestTitle;
     private String endDate;
@@ -27,6 +28,7 @@ public class TeamIWorkedResponseDto {
         String formattedDate = sdFormat.format(team.getReviewDate());
 
         return TeamIWorkedResponseDto.builder()
+                .teamId(team.getId())
                 .contestId(contest.getId())
                 .contestTitle(contest.getTitle())
                 .endDate(formattedDate)

@@ -42,7 +42,7 @@ public class TeamIappliedResponseDto {
                 .status(manufactureStatus(status))
                 .leaderMessage(team.getLeaderMessage())
                 .max(team.getHeadCount())
-                .cur(teamMemberSize)
+                .cur(teamMemberSize+1) //+1 : 팀장포함
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
                 .endDate(formatDate(team.getReviewDate()))
                 .build();
