@@ -25,6 +25,8 @@ public class RecruitingTeamResponseDto {
 
     private String contesttitle; //공모전 이름
 
+    private Long teamId;
+
     private Long teamLeaderId;
 
     private String teamLeaderName;
@@ -37,7 +39,9 @@ public class RecruitingTeamResponseDto {
 
         this.contestId = contest.getId();
 
-        this.contesttitle =contest.getTitle();
+        this.contesttitle = contest.getTitle();
+
+        this.teamId = team.getId();
 
         this.teamLeaderId = user.getId();
 
