@@ -396,7 +396,6 @@ public class TeamService {
     }
 
     private List<Team> getReviewDateAfterTeam(Date date) {
-        System.out.println(date);
         return teamRepository.findAllByReviewDateLessThanAndProgress(date, PROCEEDING.getNumber());
     }
 
