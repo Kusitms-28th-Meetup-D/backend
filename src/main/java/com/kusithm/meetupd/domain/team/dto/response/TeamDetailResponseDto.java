@@ -40,11 +40,11 @@ public class TeamDetailResponseDto {
                 .leaderInfo(new ResponseTeamMemeberDto(leader))
                 .leaderMessage(team.getLeaderMessage())
                 .max(max)
-                .cur(cur)
+                .cur(cur+1) //팀장 포함
                 .location(LocationType.ofCode(team.getLocation().getLocationType()).getValue())
                 .endDate(formattedDate)
                 .notice(team.getNotice())
-                .leftMember(max - cur)
+                .leftMember(max - cur -1)
                 .teamMemeberInfos(teamMemeberInfos.stream().map(ResponseTeamMemeberDto::new).collect(Collectors.toList()))
                 .status(status)
                 .build();
