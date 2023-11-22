@@ -19,6 +19,7 @@ public class TeamIOpenedResponseDto {
     private int applyMemberSize;
     private List<ResponseTeamMemeberDto> teamMemberInfos;
     private List<ResponseTeamMemeberDto> applyMemberInfos;
+    private String contestId;
     private String contestTitle;
     private List<String> contestImage;
 
@@ -29,6 +30,7 @@ public class TeamIOpenedResponseDto {
                 .applyMemberSize(applyMemberInfos.size())
                 .teamMemberInfos(teamMemberInfos.stream().map(user -> new ResponseTeamMemeberDto(user)).collect(Collectors.toList()))
                 .applyMemberInfos(applyMemberInfos.stream().map(user -> new ResponseTeamMemeberDto(user)).collect(Collectors.toList()))
+                .contestId(contest.getId())
                 .contestTitle(contest.getTitle())
                 .contestImage(contest.getContestImages())
                 .build();
