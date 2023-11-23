@@ -5,11 +5,13 @@ import com.kusithm.meetupd.common.error.EntityNotFoundException;
 import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto;
 import com.kusithm.meetupd.domain.contest.dto.response.GetContestDetailInfoResponseDto;
+import com.kusithm.meetupd.domain.contest.dto.response.GetMainRecommendationResponseDto;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.entity.ContestType;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.review.entity.Review;
 import com.kusithm.meetupd.domain.review.mongo.ReviewRepository;
+import com.kusithm.meetupd.domain.team.dto.response.RecruitingTeamResponseDto;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import com.kusithm.meetupd.domain.team.mysql.TeamRepository;
@@ -33,6 +35,7 @@ import java.util.List;
 import static com.kusithm.meetupd.common.error.ErrorCode.USER_REVIEW_NOT_FOUND;
 import static com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto.createListOf;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITMENT_COMPLETED;
+import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 
 @RequiredArgsConstructor
 @Service
@@ -70,6 +73,13 @@ public class ContestService {
         }
         averageContestUserComments /= teams.size();
         return GetContestDetailInfoResponseDto.of(findContest, LocalDate.now(),  Math.floor(averageContestUserComments * 10) / 10);
+    }
+
+    public GetMainRecommendationResponseDto getMainRecommendContestsAndTeams() {
+        List<Contest> recommendationContests = contestRepository.findRecommendationSixContests(LocalDate.now());
+        List<Team> popularTeams = teamRepository.findPopularTeams();
+        List<RecruitingTeamResponseDto> recruitingTeamResponseDtos = createRecruitingTeamResponseDtos(popularTeams);
+        return GetMainRecommendationResponseDto.of(recommendationContests, recruitingTeamResponseDtos, LocalDate.now());
     }
 
     private List<Team> findAllRecuritTeamByContestTitle(String contestId) {
@@ -122,6 +132,26 @@ public class ContestService {
         List<Contest> contests = new ArrayList<>();
         result.forEach(doc -> contests.add(mongoConverter.read(Contest.class, doc)));
         return contests;
+    }
+
+    private List<RecruitingTeamResponseDto> createRecruitingTeamResponseDtos(List<Team> popularTeams) {
+        List<RecruitingTeamResponseDto> recruitingTeamResponseDtos = new ArrayList<>();
+        for (Team popularTeam : popularTeams) {
+            Contest teamContest = getContestById(popularTeam.getContestId());
+            for (TeamUser teamuser : popularTeam.getTeamUsers()) {
+                if (teamuser.getRole().equals(TEAM_LEADER.getCode())) {
+                    recruitingTeamResponseDtos.add(
+                            new RecruitingTeamResponseDto(teamContest,
+                                    popularTeam,
+                                    teamuser.getUser())
+                    );
+                }
+            }
+        }
+        if (recruitingTeamResponseDtos.size() > 4) {
+            recruitingTeamResponseDtos = recruitingTeamResponseDtos.subList(0, 4);
+        }
+        return recruitingTeamResponseDtos;
     }
 
     private List<FindContestsResponseDto> findAllContests(LocalDate nowDate) {

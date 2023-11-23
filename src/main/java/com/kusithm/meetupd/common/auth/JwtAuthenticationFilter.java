@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             new AntPathRequestMatcher("/api/contests/search"),
             new AntPathRequestMatcher("/api/contests/categories"),
             new AntPathRequestMatcher("/api/contests/detail"),
+            new AntPathRequestMatcher("/api/contests/main-recommendation"),
 
             // 추천사 관련 URI
             new AntPathRequestMatcher("/api/reviews/non-user"),

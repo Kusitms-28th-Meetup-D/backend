@@ -5,6 +5,7 @@ import com.kusithm.meetupd.common.dto.SuccessResponse;
 import com.kusithm.meetupd.common.dto.code.SuccessCode;
 import com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto;
 import com.kusithm.meetupd.domain.contest.dto.response.GetContestDetailInfoResponseDto;
+import com.kusithm.meetupd.domain.contest.dto.response.GetMainRecommendationResponseDto;
 import com.kusithm.meetupd.domain.contest.service.ContestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,12 @@ public class ContestController {
     @GetMapping("/detail")
     public ResponseEntity<SuccessResponse<GetContestDetailInfoResponseDto>> getContestDetailInfo(@RequestParam String contestId) {
         GetContestDetailInfoResponseDto response = contestService.getContestDetailById(contestId);
+        return SuccessResponse.of(SuccessCode.OK, response);
+    }
+
+    @GetMapping("/main-recommendation")
+    public ResponseEntity<SuccessResponse<GetMainRecommendationResponseDto>> getMainRecommendContestsAndTeams() {
+        GetMainRecommendationResponseDto response = contestService.getMainRecommendContestsAndTeams();
         return SuccessResponse.of(SuccessCode.OK, response);
     }
 
