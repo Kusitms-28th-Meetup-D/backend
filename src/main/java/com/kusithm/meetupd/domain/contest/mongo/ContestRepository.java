@@ -2,6 +2,7 @@ package com.kusithm.meetupd.domain.contest.mongo;
 
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -22,4 +23,12 @@ public interface ContestRepository extends MongoRepository<Contest, String> {
 
     @Query(value = "{recruit_end : {$gte : ?0, $lt : ?1}}")
     List<Contest> findAllEndContestsToday(LocalDate start, LocalDate end);
+
+
+    @Aggregation(pipeline = {
+            "{ $match: { recruit_end: { $gte: ?0 } } }",
+            "{ '$sort' : { 'team_num' : -1 } }",
+            "{ '$limit' : 6 }"
+    })
+    List<Contest> findRecommendationSixContests(LocalDate date);
 }
