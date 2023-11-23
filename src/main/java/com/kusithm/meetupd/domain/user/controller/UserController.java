@@ -10,8 +10,8 @@ import com.kusithm.meetupd.domain.user.dto.request.UpdateUserAccountInfoRequestD
 import com.kusithm.meetupd.domain.user.dto.request.UserProfileUpdateRequestDto;
 import com.kusithm.meetupd.domain.user.dto.response.IsUserUseTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.SpendUserTicketResponseDto;
-import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
+import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
 import com.kusithm.meetupd.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

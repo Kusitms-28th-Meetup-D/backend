@@ -1,6 +1,5 @@
 package com.kusithm.meetupd.domain.review.entity.inner;
 
-import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto;
 import com.kusithm.meetupd.domain.review.dto.request.UploadReviewRequestDto.SelectKeywordDto;
 import lombok.Builder;
 import lombok.Getter;

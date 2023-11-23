@@ -1,10 +1,6 @@
 package com.kusithm.meetupd.domain.team.dto.request;
 
 import lombok.*;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-
-import java.awt.print.Pageable;
 
 @Getter
 @Setter

@@ -2,7 +2,6 @@ package com.kusithm.meetupd.domain.team.entity;
 
 
 import com.kusithm.meetupd.common.entity.BaseEntity;
-import com.kusithm.meetupd.domain.user.entity.UserLocation;
 import jakarta.persistence.*;
 import lombok.*;
 

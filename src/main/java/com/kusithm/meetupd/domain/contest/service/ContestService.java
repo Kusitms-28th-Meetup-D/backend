@@ -31,7 +31,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.USER_REVIEW_NOT_FOUND;
 import static com.kusithm.meetupd.domain.contest.dto.response.FindContestsResponseDto.createListOf;

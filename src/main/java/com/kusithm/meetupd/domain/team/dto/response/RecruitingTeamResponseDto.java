@@ -1,16 +1,9 @@
 package com.kusithm.meetupd.domain.team.dto.response;
 
-import com.kusithm.meetupd.common.error.EnumNotFoundException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.team.entity.Team;
-import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import com.kusithm.meetupd.domain.user.entity.User;
 import lombok.*;
-
-import java.util.List;
-
-import static com.kusithm.meetupd.common.error.ErrorCode.ENUM_NOT_FOUND;
-import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
 
 @Getter
 @Setter

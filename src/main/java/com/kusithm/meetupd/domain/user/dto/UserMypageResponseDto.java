@@ -4,8 +4,6 @@ package com.kusithm.meetupd.domain.user.dto;
 import com.kusithm.meetupd.domain.user.entity.*;
 import lombok.*;
 
-import java.lang.annotation.Target;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

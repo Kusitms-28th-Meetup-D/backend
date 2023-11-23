@@ -6,10 +6,8 @@ import com.kusithm.meetupd.common.error.ApplicationException;
 import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.common.error.UnauthorizedException;
 import io.jsonwebtoken.*;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;

@@ -1,13 +1,10 @@
 package com.kusithm.meetupd.domain.team.dto.response;
 
 
-import com.kusithm.meetupd.domain.team.entity.Team;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 @Setter @Getter
 @ToString

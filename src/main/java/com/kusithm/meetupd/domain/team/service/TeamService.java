@@ -6,7 +6,6 @@ import com.kusithm.meetupd.common.error.ForbiddenException;
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.mongo.ContestRepository;
 import com.kusithm.meetupd.domain.email.service.EmailService;
-import com.kusithm.meetupd.domain.review.mongo.WaitReviewRepository;
 import com.kusithm.meetupd.domain.review.mysql.UserReviewedTeamRepository;
 import com.kusithm.meetupd.domain.team.dto.TeamIOpenedResponseDto;
 import com.kusithm.meetupd.domain.team.dto.request.PageDto;
@@ -25,14 +24,14 @@ import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,11 +41,7 @@ import java.util.stream.Collectors;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
 import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.*;
-import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.PROCEEDING;
-import static com.kusithm.meetupd.domain.team.entity.TeamProgressType.RECRUITING;
 import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.*;
-import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_LEADER;
-import static com.kusithm.meetupd.domain.team.entity.TeamUserRoleType.TEAM_MEMBER;
 
 @Service
 @RequiredArgsConstructor

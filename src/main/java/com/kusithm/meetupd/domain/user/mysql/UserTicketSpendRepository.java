@@ -5,8 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserTicketSpendRepository extends JpaRepository<UserTicketSpend, Long> {
 
-
     Boolean existsByUserIdAndPurchaseUserId(Long userId, Long purchaseUserId);
 
-//    Boolean existsByBuyUserIdAndSoldUserId(Long buyUserId, Long soldUserId);
 }
