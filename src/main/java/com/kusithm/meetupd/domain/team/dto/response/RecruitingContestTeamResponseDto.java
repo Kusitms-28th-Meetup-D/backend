@@ -27,7 +27,7 @@ public class RecruitingContestTeamResponseDto {
         return RecruitingContestTeamResponseDto.builder()
                 .teamId(team.getId())
                 .max(max)
-                .cur(teamMemeberInfos.size())
+                .cur(teamMemeberInfos.size()+1) //팀장 포함
                 .leaderMessage(team.getLeaderMessage())
                 .leftMember(max - cur)
                 .leaderInfo(new ResponseTeamMemeberDto(leader))
