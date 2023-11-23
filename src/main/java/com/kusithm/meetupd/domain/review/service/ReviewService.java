@@ -66,9 +66,8 @@ public class ReviewService {
 
     public UploadReviewResponseDto uploadReviews(Long sendUserId, UploadReviewRequestDto request) throws MessagingException, UnsupportedEncodingException {
         validateUserExist(sendUserId);
-        // TODO 개발 테스트 편의를 위해 이미 유저가 팀에 리뷰를 작성했는지 여부는 주석 처리 했습니다.
-//        if(checkUserReviewThisTeam(sendUserId, getTeamId(request)))
-//            throw new ConflictException(DUPLICATE_USER_REVIEW_TEAM);
+        if(checkUserReviewThisTeam(sendUserId, getTeamId(request)))
+            throw new ConflictException(DUPLICATE_USER_REVIEW_TEAM);
         List<WaitReview> waitReviews = makeWaitReviewListFromUploadRequest(request);
         for (WaitReview waitReview : waitReviews) {
             uploadOrWaitReview(waitReview);
