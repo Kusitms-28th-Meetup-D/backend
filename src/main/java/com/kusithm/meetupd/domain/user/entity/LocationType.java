@@ -1,7 +1,6 @@
 package com.kusithm.meetupd.domain.user.entity;
 
 import com.kusithm.meetupd.common.error.EnumNotFoundException;
-import com.kusithm.meetupd.domain.contest.entity.ContestType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

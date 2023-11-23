@@ -2,7 +2,6 @@ package com.kusithm.meetupd.domain.team.dto;
 
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.team.dto.response.ResponseTeamMemeberDto;
-import com.kusithm.meetupd.domain.team.dto.response.TeamDetailResponseDto;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.user.entity.User;
 import lombok.Builder;

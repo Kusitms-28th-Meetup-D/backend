@@ -1,6 +1,5 @@
 package com.kusithm.meetupd.common.error.dto;
 
-import com.kusithm.meetupd.common.error.ApplicationException;
 import com.kusithm.meetupd.common.error.ErrorCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

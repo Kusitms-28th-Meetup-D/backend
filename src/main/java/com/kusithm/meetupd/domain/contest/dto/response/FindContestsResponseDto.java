@@ -3,7 +3,6 @@ package com.kusithm.meetupd.domain.contest.dto.response;
 
 import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.entity.ContestType;
-import jdk.jfr.ContentType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,8 +21,6 @@ public class FindContestsResponseDto {
     private String title;
 
     private String company;
-
-//    private List<Integer> types;
 
     private List<String> types;
 

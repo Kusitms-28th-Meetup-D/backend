@@ -4,8 +4,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
-import com.kusithm.meetupd.common.error.ErrorCode;
 import com.kusithm.meetupd.common.error.FileUploadFailedException;
 import com.kusithm.meetupd.domain.fileUpload.dto.response.FileUploadResponse;
 import com.kusithm.meetupd.domain.fileUpload.entity.Image;

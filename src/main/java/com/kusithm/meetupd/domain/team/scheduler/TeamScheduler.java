@@ -1,6 +1,5 @@
 package com.kusithm.meetupd.domain.team.scheduler;
 
-import com.kusithm.meetupd.domain.contest.entity.Contest;
 import com.kusithm.meetupd.domain.contest.service.ContestService;
 import com.kusithm.meetupd.domain.team.entity.Team;
 import com.kusithm.meetupd.domain.team.service.TeamService;

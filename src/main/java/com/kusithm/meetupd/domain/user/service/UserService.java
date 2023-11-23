@@ -10,9 +10,10 @@ import com.kusithm.meetupd.domain.user.dto.request.UpdateUserAccountInfoRequestD
 import com.kusithm.meetupd.domain.user.dto.request.UserProfileUpdateRequestDto;
 import com.kusithm.meetupd.domain.user.dto.response.IsUserUseTicketResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.SpendUserTicketResponseDto;
-import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
 import com.kusithm.meetupd.domain.user.dto.response.UserCheckResponseDto;
-import com.kusithm.meetupd.domain.user.entity.*;
+import com.kusithm.meetupd.domain.user.dto.response.UserTicketCountResponseDto;
+import com.kusithm.meetupd.domain.user.entity.User;
+import com.kusithm.meetupd.domain.user.entity.UserTicketSpend;
 import com.kusithm.meetupd.domain.user.mysql.UserRepository;
 import com.kusithm.meetupd.domain.user.mysql.UserTicketSpendRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.kusithm.meetupd.common.error.ErrorCode.*;
-import static com.kusithm.meetupd.domain.user.entity.UserTicketSpend.*;
+import static com.kusithm.meetupd.domain.user.entity.UserTicketSpend.createUserTicketSpend;
 
 @RequiredArgsConstructor
 @Transactional

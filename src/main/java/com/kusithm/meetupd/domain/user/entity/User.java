@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.kusithm.meetupd.domain.user.entity.Major.createMajor;
 import static com.kusithm.meetupd.domain.user.entity.Task.createTask;
-import static com.kusithm.meetupd.domain.user.entity.Ticket.*;
+import static com.kusithm.meetupd.domain.user.entity.Ticket.createInitTicket;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -3,7 +3,6 @@ package com.kusithm.meetupd.domain.team.mysql;
 import com.kusithm.meetupd.domain.team.entity.TeamUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
